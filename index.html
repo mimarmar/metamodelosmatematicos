@@ -1,0 +1,2788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="riso">
+  <title>Modelos para resolver problemas matemáticos — Metodología de José Antonio Fernández Bravo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* 1. Riso style tokens */
+      --background: #f7f3ea;
+      --surface-container-low: #ffffff;
+      --surface-container: #efe8d8;
+      --surface-container-high: #fff8b3;
+
+      --on-surface: #1d2a5a;
+      --on-surface-variant: #3d4775;
+
+      --outline: #1d2a5a;
+      --outline-variant: #c3c6d9;
+
+      --primary: #006aa8;
+      --on-primary: #ffffff;
+      --primary-container: #ffe800;
+      --on-primary-container: #1d2a5a;
+      --secondary: #ff52b4;
+      --tertiary: #d00074;
+      --error: #c0262d;
+      --on-error: #ffffff;
+
+      --data-1: #0078bf;
+      --data-2: #d00074;
+      --data-3: #1d2a5a;
+      --data-4: #d9531e;
+      --data-context: #b4b8cc;
+
+      --font-headline: 'Archivo', sans-serif;
+      --font-body: 'Work Sans', sans-serif;
+      --font-label: 'Space Mono', monospace;
+
+      --rounded: 0.25rem;
+      --rounded-lg: 0.5rem;
+      --rounded-full: 9999px;
+
+      --misregister: 3px 2px 0 rgb(255 82 180 / 0.85);
+      --ink-border: 2px solid var(--outline);
+      --offset-pink: 5px 5px 0 var(--secondary);
+      --offset-blue: 5px 5px 0 var(--primary);
+      --offset-sm: 3px 3px 0 var(--primary);
+      --offset-navy-sm: 3px 3px 0 var(--outline);
+      --halftone: radial-gradient(rgb(29 42 90 / 0.07) 1px, transparent 1.2px);
+      --halftone-size: 6px 6px;
+
+      /* 3. Shared foundation tokens */
+      --positive: #136f42;
+      --warning: #9a5200;
+      --focus: var(--primary);
+
+      /* Dashboard / Explorer type scale */
+      --display-size: clamp(1.85rem, 1.35rem + 1.8vw, 2.75rem);
+      --headline-size: clamp(1.35rem, 1.1rem + 0.85vw, 1.85rem);
+      --subhead-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+      --body-size: clamp(0.95rem, 0.92rem + 0.15vw, 1.03rem);
+      --label-size: 0.75rem;
+
+      /* Spacing scale */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
+    }
+
+    /* Base reset */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { overflow-x: clip; margin: 0; padding: 0; }
+    header { position: static !important; }
+
+    body {
+      background-color: var(--background);
+      background-image: var(--halftone);
+      background-size: var(--halftone-size);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page-grid {
+      display: grid;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      max-width: 1240px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .page-grid * { min-width: 0; }
+
+    /* Focus rings */
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4 {
+      margin: 0;
+      font-family: var(--font-headline);
+      color: var(--on-surface);
+    }
+
+    p {
+      margin: 0;
+      max-width: 68ch;
+    }
+
+    .misregister {
+      font-family: var(--font-headline);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      line-height: 1.03;
+      color: var(--primary);
+      text-shadow: var(--misregister);
+    }
+
+    .display-title {
+      font-size: var(--display-size);
+    }
+
+    .section-title {
+      font-size: var(--headline-size);
+    }
+
+    .subhead {
+      font-family: var(--font-headline);
+      font-weight: 800;
+      font-size: var(--subhead-size);
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+      color: var(--on-surface);
+    }
+
+    .label-voice {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--on-surface-variant);
+    }
+
+    .stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: var(--primary);
+      color: var(--on-primary);
+      border-radius: var(--rounded-full);
+      padding: var(--space-xs) var(--space-md);
+      line-height: 1.3;
+    }
+
+    .stamp-yellow {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      border: var(--ink-border);
+    }
+
+    .stamp-outline {
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      border: var(--ink-border);
+    }
+
+    .highlight-flood {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      padding: 0.1em 0.35em;
+      border-radius: var(--rounded);
+      font-weight: 600;
+    }
+
+    .magenta-note {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 700;
+      color: var(--tertiary);
+    }
+
+    /* Ink Blocks */
+    .ink-block {
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--offset-pink);
+      padding: var(--space-lg);
+    }
+
+    .ink-block-blue {
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--offset-blue);
+      padding: var(--space-lg);
+    }
+
+    .ink-block-yellow {
+      background: var(--surface-container-high);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--offset-blue);
+      padding: var(--space-lg);
+    }
+
+    .ink-block-recessed {
+      background: var(--surface-container);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+    }
+
+    .ink-block-alt-grid > .ink-item {
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--offset-pink);
+      padding: var(--space-lg);
+    }
+
+    .ink-block-alt-grid > .ink-item:nth-child(even) {
+      background: var(--surface-container-high);
+      box-shadow: var(--offset-blue);
+    }
+
+    /* Masthead */
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+      padding-bottom: var(--space-lg);
+      border-bottom: 2px solid var(--outline);
+    }
+
+    .masthead-main {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+
+    .masthead-lede {
+      font-size: 1.05rem;
+      color: var(--on-surface-variant);
+      max-width: 62ch;
+    }
+
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+
+    .kpi-tile {
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--offset-sm);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .kpi-tile:nth-child(2) {
+      background: var(--surface-container-high);
+      box-shadow: 3px 3px 0 var(--secondary);
+    }
+
+    .kpi-figure {
+      font-family: var(--font-headline);
+      font-weight: 900;
+      font-size: clamp(1.45rem, 1.2rem + 0.9vw, 2rem);
+      line-height: 1.05;
+      color: var(--on-surface);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Tab Navigation */
+    .tab-nav-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+      padding: var(--space-sm) 0;
+    }
+
+    .tab-btn {
+      appearance: none;
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      box-shadow: 3px 3px 0 var(--outline);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      transition: transform var(--dur-micro) var(--ease-out),
+                  box-shadow var(--dur-micro) var(--ease-out),
+                  background-color var(--dur-micro) var(--ease-out);
+    }
+
+    .tab-btn:hover {
+      background: var(--surface-container-high);
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0 var(--outline);
+    }
+
+    .tab-btn[aria-selected="true"] {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      box-shadow: var(--offset-sm);
+      transform: translate(-1px, -1px);
+    }
+
+    .tab-panel {
+      display: none;
+      animation: tabReveal var(--dur-short) var(--ease-out);
+    }
+
+    .tab-panel.active {
+      display: grid;
+      gap: var(--space-xl);
+    }
+
+    @keyframes tabReveal {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Buttons & Inputs */
+    .btn {
+      appearance: none;
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      transition: transform var(--dur-micro) var(--ease-out),
+                  box-shadow var(--dur-micro) var(--ease-out),
+                  background-color var(--dur-micro) var(--ease-out);
+    }
+
+    .btn-primary {
+      background: var(--secondary);
+      color: var(--on-surface);
+      box-shadow: var(--offset-sm);
+    }
+    .btn-primary:hover {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0 var(--primary);
+    }
+
+    .btn-secondary {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      box-shadow: var(--offset-navy-sm);
+    }
+    .btn-secondary:hover {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0 var(--outline);
+    }
+
+    .btn-ghost {
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      box-shadow: none;
+    }
+    .btn-ghost:hover {
+      background: var(--surface-container-high);
+    }
+
+    .btn-active-filter {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: 2px 2px 0 var(--secondary);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .field-input, .field-select, .field-textarea {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--on-surface);
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      padding: 0.6rem 0.85rem;
+      min-height: 44px;
+      width: 100%;
+    }
+
+    .field-select {
+      padding-right: 2rem;
+    }
+
+    .field-input:focus-visible, .field-select:focus-visible, .field-textarea:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+      box-shadow: var(--offset-sm);
+    }
+
+    /* Section Header */
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid var(--outline);
+    }
+
+    /* Grids */
+    .grid-2-asym {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .grid-2-eq {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-lg);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+      gap: var(--space-lg);
+    }
+
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+
+    .pillar-card {
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--offset-sm);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .pillar-card:nth-child(even) {
+      background: var(--surface-container-high);
+      box-shadow: 3px 3px 0 var(--secondary);
+    }
+
+    /* Quote block */
+    .pull-quote {
+      border-left: 5px solid var(--primary);
+      padding-left: var(--space-md);
+      font-size: 1.08rem;
+      font-weight: 600;
+      color: var(--on-surface);
+      margin-block: var(--space-sm);
+    }
+
+    /* Diagnostic 8 errors widget */
+    .error-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    .error-chip {
+      font-family: var(--font-label);
+      font-size: 0.76rem;
+      font-weight: 700;
+      min-height: 44px;
+      padding: var(--space-xs) var(--space-md);
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      transition: background-color var(--dur-micro) var(--ease-out),
+                  transform var(--dur-micro) var(--ease-out);
+    }
+
+    .error-chip:hover {
+      background: var(--surface-container-high);
+    }
+
+    .error-chip.active {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: 3px 3px 0 var(--secondary);
+    }
+
+    /* Tables */
+    .riso-table-wrap {
+      overflow-x: auto;
+    }
+
+    .riso-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    .riso-table th {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      text-align: left;
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 2px solid var(--outline);
+      color: var(--on-surface);
+    }
+
+    .riso-table td {
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--outline-variant);
+      vertical-align: top;
+    }
+
+    .riso-table tr.row-highlight td {
+      background: var(--surface-container-high);
+      font-weight: 600;
+    }
+
+    .num-cell {
+      font-family: var(--font-label);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    /* Phase Stepper */
+    .phase-rail {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: var(--space-sm);
+    }
+
+    .phase-step-btn {
+      appearance: none;
+      text-align: left;
+      min-height: 72px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      box-shadow: 3px 3px 0 var(--outline);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-xs);
+      transition: transform var(--dur-micro) var(--ease-out),
+                  background-color var(--dur-micro) var(--ease-out);
+    }
+
+    .phase-step-btn:hover {
+      background: var(--surface-container-high);
+      transform: translate(1px, 1px);
+    }
+
+    .phase-step-btn.active {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: var(--offset-pink);
+      transform: translate(-1px, -1px);
+    }
+
+    .phase-step-btn.active .label-voice {
+      color: var(--primary-container);
+    }
+
+    /* Metamodel selector */
+    .meta-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(185px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+
+    .meta-card-btn {
+      appearance: none;
+      text-align: left;
+      padding: var(--space-md);
+      min-height: 112px;
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: 4px 4px 0 var(--outline);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      transition: transform var(--dur-micro) var(--ease-out),
+                  background-color var(--dur-micro) var(--ease-out);
+    }
+
+    .meta-card-btn:hover {
+      background: var(--surface-container-high);
+      transform: translate(1px, 1px);
+    }
+
+    .meta-card-btn.active {
+      background: var(--surface-container-high);
+      box-shadow: var(--offset-pink);
+      outline: 3px solid var(--primary);
+      outline-offset: -3px;
+    }
+
+    /* E-P-R-S interactive toggle pills */
+    .eprs-toggle {
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      cursor: pointer;
+    }
+
+    .eprs-toggle.given {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: 3px 3px 0 var(--secondary);
+    }
+
+    /* Accordion / Itinerary */
+    .phase-doc-item {
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      background: var(--surface-container-low);
+      overflow: hidden;
+    }
+
+    .phase-doc-trigger {
+      width: 100%;
+      min-height: 52px;
+      padding: var(--space-sm) var(--space-md);
+      background: transparent;
+      color: var(--on-surface);
+      border: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      text-align: left;
+      font-family: var(--font-headline);
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .phase-doc-trigger:hover {
+      background: var(--surface-container-high);
+    }
+
+    .phase-doc-body {
+      display: none;
+      padding: var(--space-md);
+      border-top: 1px solid var(--outline-variant);
+      background: var(--surface-container-low);
+    }
+
+    .phase-doc-item.open .phase-doc-body {
+      display: grid;
+      gap: var(--space-sm);
+    }
+
+    /* Checklist */
+    .checklist-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+      border-bottom: 1px solid var(--outline-variant);
+      cursor: pointer;
+      min-height: 44px;
+    }
+
+    .checklist-row:last-child {
+      border-bottom: 0;
+    }
+
+    .checklist-row input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: var(--primary);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    /* Problem Bank Cards */
+    .bank-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+      gap: var(--space-md);
+      align-items: end;
+    }
+
+    .problem-card {
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--offset-pink);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+
+    .problem-card:nth-child(even) {
+      box-shadow: var(--offset-blue);
+    }
+
+    .problem-card.worked {
+      background: var(--surface-container-high);
+    }
+
+    .problem-statement {
+      background: var(--surface-container);
+      border-left: 4px solid var(--primary);
+      padding: var(--space-md);
+      border-radius: var(--rounded);
+      font-size: 0.98rem;
+      line-height: 1.55;
+    }
+
+    .problem-guide {
+      display: none;
+      border-top: 2px dashed var(--outline-variant);
+      padding-top: var(--space-md);
+      gap: var(--space-sm);
+    }
+
+    .problem-guide.open {
+      display: grid;
+    }
+
+    /* Chart containers */
+    .chart-wrap {
+      position: relative;
+      min-height: 300px;
+      height: 310px;
+      width: 100%;
+    }
+
+    /* Inline status toast / banner */
+    .status-note {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--rounded);
+      background: var(--surface-container-high);
+      border: 1px solid var(--outline);
+      color: var(--on-surface);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .status-note.success {
+      border-color: var(--positive);
+      color: var(--positive);
+    }
+
+    .list-clean {
+      margin: 0;
+      padding-left: 1.25rem;
+      display: grid;
+      gap: var(--space-xs);
+    }
+
+    .footer-colophon {
+      border-top: 2px solid var(--outline);
+      padding-top: var(--space-md);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-md);
+      color: var(--on-surface-variant);
+      font-size: 0.88rem;
+    }
+
+    /* Container queries */
+    .card-wrapper { container-type: inline-size; }
+    @container (max-width: 440px) {
+      .compact-stack { grid-template-columns: 1fr !important; }
+    }
+
+    /* Responsive breakpoints */
+    @media (max-width: 960px) {
+      .masthead {
+        grid-template-columns: 1fr;
+      }
+      .grid-2-asym, .grid-2-eq {
+        grid-template-columns: 1fr;
+      }
+      .phase-rail {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-grid {
+        padding: var(--space-md);
+        gap: var(--space-md);
+      }
+      .kpi-strip {
+        grid-template-columns: 1fr;
+      }
+      .phase-rail {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .tab-nav-wrap {
+        gap: var(--space-xs);
+      }
+      .tab-btn {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-grid">
+
+    <!-- MASTHEAD -->
+    <header class="masthead">
+      <div class="masthead-main">
+        <span class="stamp">Educación Primaria · Cuaderno Docente</span>
+        <h1 class="misregister display-title">Modelos para resolver problemas matemáticos</h1>
+        <p class="masthead-lede">
+          Guía interactiva sobre la metodología de <strong>José Antonio Fernández Bravo</strong>: enseñar a pensar matemáticamente mediante la metacognición, la creatividad y la invención-reconstrucción de situaciones problemáticas.
+        </p>
+      </div>
+
+      <div class="kpi-strip" aria-label="Cifras clave de la metodología">
+        <div class="kpi-tile">
+          <span class="label-voice">Itinerario</span>
+          <span class="kpi-figure">6 Fases</span>
+          <span class="magenta-note">Querer → Concluir</span>
+        </div>
+        <div class="kpi-tile">
+          <span class="label-voice">Taxonomía</span>
+          <span class="kpi-figure">49 Modelos</span>
+          <span class="magenta-note">En 6 metamodelos</span>
+        </div>
+        <div class="kpi-tile">
+          <span class="label-voice">Evidencia 4.º EP</span>
+          <span class="kpi-figure">p = 0,002</span>
+          <span class="magenta-note">Mejora en argumentar</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- TAB NAVIGATION -->
+    <nav aria-label="Secciones de la guía docente">
+      <div class="tab-nav-wrap" role="tablist">
+        <button type="button" class="tab-btn" role="tab" id="tab-btn-fundamentos" aria-selected="true" aria-controls="panel-fundamentos" onclick="switchTab('fundamentos')">
+          <i data-lucide="compass" aria-hidden="true"></i>
+          <span>1. Inicio y Fundamentos</span>
+        </button>
+        <button type="button" class="tab-btn" role="tab" id="tab-btn-fases" aria-selected="false" aria-controls="panel-fases" onclick="switchTab('fases')">
+          <i data-lucide="layers" aria-hidden="true"></i>
+          <span>2. Las 6 Fases de Resolución</span>
+        </button>
+        <button type="button" class="tab-btn" role="tab" id="tab-btn-metamodelos" aria-selected="false" aria-controls="panel-metamodelos" onclick="switchTab('metamodelos')">
+          <i data-lucide="shapes" aria-hidden="true"></i>
+          <span>3. Los 6 Metamodelos</span>
+        </button>
+        <button type="button" class="tab-btn" role="tab" id="tab-btn-guia" aria-selected="false" aria-controls="panel-guia" onclick="switchTab('guia')">
+          <i data-lucide="clipboard-check" aria-hidden="true"></i>
+          <span>4. Guía de Aula para Docentes</span>
+        </button>
+        <button type="button" class="tab-btn" role="tab" id="tab-btn-banco" aria-selected="false" aria-controls="panel-banco" onclick="switchTab('banco')">
+          <i data-lucide="library" aria-hidden="true"></i>
+          <span>5. Banco de Situaciones</span>
+        </button>
+      </div>
+    </nav>
+
+    <main>
+      <!-- =========================================================
+           TAB 1: INICIO Y FUNDAMENTOS
+           ========================================================= -->
+      <section id="panel-fundamentos" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-fundamentos">
+        <div class="section-head">
+          <div>
+            <span class="label-voice">Epistemología y pensamiento matemático</span>
+            <h2 class="misregister section-title">El razonamiento por encima del cálculo</h2>
+          </div>
+          <span class="stamp stamp-yellow">La distancia más corta es un buen desafío</span>
+        </div>
+
+        <div class="grid-2-asym">
+          <article class="ink-block">
+            <span class="stamp">Tesis central</span>
+            <blockquote class="pull-quote">
+              «La matemática es una actividad mental. El pensamiento matemático es uno y no varios. Su instrumento no es el cálculo, sino el razonamiento.»
+            </blockquote>
+            <p>
+              Frente al dogma escolar del <em>«así se hace, así se calcula»</em>, Fernández Bravo propone que la matemática en Primaria sea un <span class="highlight-flood">oficio de comprensión</span> antes que de velocidad mecánica. El saber matemático no se mide por la cantidad de ejercicios resueltos, sino por la actividad mental para interpretar, formular, relacionar y verificar.
+            </p>
+            <div style="margin-top: var(--space-md); display: grid; gap: var(--space-sm);">
+              <div><strong>Un solo cálculo:</strong> No existe un «cálculo mental» separado del «cálculo escrito»; la mente no piensa de una forma con bolígrafo y de otra distinta sin él.</div>
+              <div><strong>Estructuras, no temas sueltos:</strong> Si el niño comprende que <code>5 = 3 + 2</code>, aplica esa misma estructura a <code>50 = 30 + 20</code> o <code>505 = 300 + 200 + 3 + 2</code>.</div>
+              <div><strong>Lenguaje como punto de llegada:</strong> La notación simbólica formal debe coronar la comprensión, nunca imponerse como punto de partida.</div>
+            </div>
+          </article>
+
+          <aside class="ink-block-yellow" style="display: grid; gap: var(--space-md);">
+            <div>
+              <span class="stamp">Claridad mental</span>
+              <h3 class="subhead" style="margin-top: var(--space-sm);">Concepto, símbolo y consistencia</h3>
+            </div>
+            <p>
+              El <strong>concepto</strong> refiere al significado; el <strong>símbolo</strong>, a su representación. Identificar el cero con «un donut» o el 6 con «el número que no quiso ser cero» impide apropiarse del concepto.
+            </p>
+            <div style="border-top: 2px solid var(--outline); padding-top: var(--space-sm);">
+              <div class="label-voice">Trampa de inconsistencia didáctica</div>
+              <p style="margin-top: var(--space-xs);">
+                Si enseñamos que «restar es quitar», generamos contradicción cuando en un problema me quitan 3 € por la mañana y 2 € por la tarde: para saber cuánto me han quitado en total, <strong>sumamos</strong>. El rigor es claridad mental, no formalismo vacío.
+              </p>
+            </div>
+          </aside>
+        </div>
+
+        <!-- 5 Pilares -->
+        <div>
+          <div style="margin-bottom: var(--space-md);">
+            <span class="label-voice">Arquitectura cognitiva del aprendizaje</span>
+            <h3 class="subhead">Los 5 pilares del pensamiento matemático</h3>
+          </div>
+          <div class="pillars-grid">
+            <div class="pillar-card">
+              <span class="stamp">01</span>
+              <h4 class="subhead">Observación</h4>
+              <p>Detectar regularidades, unidades de magnitud y condiciones reales del enunciado antes de operar.</p>
+            </div>
+            <div class="pillar-card">
+              <span class="stamp">02</span>
+              <h4 class="subhead">Intuición</h4>
+              <p>Anticipar relaciones lógicas («¿qué pasaría si…?», «supongamos que…») que guían el plan de búsqueda.</p>
+            </div>
+            <div class="pillar-card">
+              <span class="stamp">03</span>
+              <h4 class="subhead">Creatividad</h4>
+              <p>Inventar y reconstruir problemas, hallar múltiples vías hacia un resultado y crear reglas propias.</p>
+            </div>
+            <div class="pillar-card">
+              <span class="stamp">04</span>
+              <h4 class="subhead">Razonamiento</h4>
+              <p>Establecer relaciones lógicas válidas y argumentos demostrables sin depender del azar ni de trucos verbales.</p>
+            </div>
+            <div class="pillar-card">
+              <span class="stamp">05</span>
+              <h4 class="subhead">Emoción</h4>
+              <p>Disfrutar del reto, perder el miedo al fallo y sentir seguridad y autonomía al defender ideas ante el grupo.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metacognición y el papel del error + Widget de los 8 errores -->
+        <div class="grid-2-eq">
+          <article class="ink-block-blue" style="display: grid; gap: var(--space-md);">
+            <div>
+              <span class="stamp">Metacognición y Error</span>
+              <h3 class="subhead" style="margin-top: var(--space-sm);">Aprender «en el error» sin sancionar</h3>
+            </div>
+            <p>
+              El error forma parte natural del proceso de conocimiento. Fernández Bravo distingue entre el «error» sancionado y aprender <strong>«en el error»</strong>: cuando el alumno toma conciencia de por qué falló su razonamiento y descubre el fallo mediante contraejemplos y diálogo entre iguales.
+            </p>
+            <ul class="list-clean">
+              <li><strong>Evitar «bien» o «mal» como autoridad:</strong> Sustituir la sentencia del docente por mecanismos de autocorrección y verificación reversible.</li>
+              <li><strong>Contrastación entre compañeros:</strong> Comprender las estrategias de otro compañero aporta más al aprendizaje que repetir explicaciones magistrales.</li>
+              <li><strong>No buscar primero la solución exacta:</strong> En un primer momento se persigue descubrir fallos, producir estrategias y reforzar la seguridad personal.</li>
+            </ul>
+          </article>
+
+          <article class="ink-block" style="display: grid; gap: var(--space-md);">
+            <div>
+              <span class="stamp">Diagnóstico interactivo</span>
+              <h3 class="subhead" style="margin-top: var(--space-sm);">Los 8 errores habituales del alumnado</h3>
+              <p style="margin-top: var(--space-xs); color: var(--on-surface-variant);">
+                Selecciona un patrón de error frecuente en Primaria para ver cómo se manifiesta y qué desafío metodológico lo corrige:
+              </p>
+            </div>
+            <div class="error-chips" id="error-chips-container" role="group" aria-label="Selector de errores habituales"></div>
+            <div class="ink-block-recessed" id="error-detail-box" aria-live="polite"></div>
+          </article>
+        </div>
+
+        <!-- Evidencia empírica -->
+        <article class="ink-block-blue">
+          <div class="section-head" style="margin-bottom: var(--space-md);">
+            <div>
+              <span class="label-voice">Investigación cuasi-experimental · Fernández Bravo y Barbarán Sánchez (2012)</span>
+              <h3 class="subhead">Impacto probado en 4.º de Educación Primaria</h3>
+            </div>
+            <div style="display: flex; gap: var(--space-xs); flex-wrap: wrap;">
+              <button type="button" class="btn btn-ghost btn-active-filter" id="chart-mode-f" onclick="setAnovaChartMode('f')">Ver Razón F</button>
+              <button type="button" class="btn btn-ghost" id="chart-mode-sig" onclick="setAnovaChartMode('sig')">Ver Confianza (%)</button>
+            </div>
+          </div>
+
+          <div class="grid-2-asym">
+            <div>
+              <div class="chart-wrap">
+                <canvas id="anovaChart" aria-label="Gráfico de resultados ANOVA en 4º de Educación Primaria"></canvas>
+              </div>
+              <p class="magenta-note" style="margin-top: var(--space-sm);">
+                Muestra: 155 alumnos (103 experimentales en 4 grupos, 52 control en 2 grupos) de 4 CEIP públicos de Madrid · 22 sesiones semanales de 2 h durante 8 meses · Prueba diagnóstica de 33 ítems.
+              </p>
+            </div>
+
+            <div class="riso-table-wrap">
+              <table class="riso-table">
+                <thead>
+                  <tr>
+                    <th>Competencia (Niss)</th>
+                    <th>Razón F</th>
+                    <th>Sig. (p)</th>
+                    <th>Efecto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="row-highlight">
+                    <td>Argumentar matemáticamente (ARG)</td>
+                    <td class="num-cell">6,8466</td>
+                    <td class="num-cell">0,002</td>
+                    <td>Significativo (100 %)</td>
+                  </tr>
+                  <tr class="row-highlight">
+                    <td>Plantear y resolver problemas (PRPM)</td>
+                    <td class="num-cell">10,4532</td>
+                    <td class="num-cell">0,003</td>
+                    <td>Significativo (100 %)</td>
+                  </tr>
+                  <tr class="row-highlight">
+                    <td>Pensar matemáticamente (PR)</td>
+                    <td class="num-cell">12,6586</td>
+                    <td class="num-cell">0,040</td>
+                    <td>Significativo (96 %)</td>
+                  </tr>
+                  <tr>
+                    <td>Comunicarse con las matemáticas (COM)</td>
+                    <td class="num-cell">8,5642</td>
+                    <td class="num-cell">0,170</td>
+                    <td>No significativo</td>
+                  </tr>
+                  <tr>
+                    <td>Representar entidades matemáticas (REP)</td>
+                    <td class="num-cell">7,6318</td>
+                    <td class="num-cell">0,280</td>
+                    <td>No significativo</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p style="margin-top: var(--space-sm); font-size: 0.9rem; color: var(--on-surface-variant);">
+                Los resultados confirman que la invención y reconstrucción de problemas desarrolla de forma sólida el pensamiento matemático, el planteamiento-resolución y la argumentación; para representación y comunicación formal se recomienda complementar con actividades específicas.
+              </p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- =========================================================
+           TAB 2: LAS 6 FASES DE RESOLUCIÓN
+           ========================================================= -->
+      <section id="panel-fases" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-fases">
+        <div class="section-head">
+          <div>
+            <span class="label-voice">Del impulso emocional a la formalización</span>
+            <h2 class="misregister section-title">Las 6 fases de resolución de problemas</h2>
+          </div>
+          <span class="stamp">Proceso creativo vivencial</span>
+        </div>
+
+        <article class="ink-block">
+          <p>
+            Las cuatro fases clásicas (comprender, concebir un plan, ejecutar y revisar) describen una secuencia externa de elaboración, pero no activan por sí solas el proceso creativo. Fernández Bravo propone <strong>6 fases interiorizadas por necesidad</strong>, en las que el alumnado pasa del deseo de investigar a la argumentación colectiva y la síntesis metacognitiva.
+          </p>
+        </article>
+
+        <!-- Interactive 6-Phase Rail -->
+        <div style="display: grid; gap: var(--space-md);">
+          <div class="phase-rail" id="phase-rail" role="tablist" aria-label="Selector de las 6 fases"></div>
+
+          <article class="ink-block-yellow card-wrapper" id="phase-detail-panel" aria-live="polite">
+            <!-- Populated by JS -->
+          </article>
+        </div>
+
+        <!-- Unidad de actuación cerrada (5 momentos de clase) -->
+        <article class="ink-block-blue">
+          <div style="margin-bottom: var(--space-md);">
+            <span class="stamp">Estructura de sesión</span>
+            <h3 class="subhead" style="margin-top: var(--space-sm);">Cómo llevarlo a una sesión de aula: la «Unidad de Actuación Cerrada»</h3>
+            <p style="margin-top: var(--space-xs); color: var(--on-surface-variant);">
+              En las sesiones semanales del programa (2 problemas de media por sesión para dar tiempo real al debate), cada actividad sigue cinco momentos independientes:
+            </p>
+          </div>
+
+          <div class="pillars-grid">
+            <div class="pillar-card">
+              <span class="label-voice">Momento 1</span>
+              <h4 class="subhead">Apertura</h4>
+              <p>Se plantea el desafío con claridad y se asegura que el grupo comprende qué hay que hacer, sin anticipar cómo resolverlo.</p>
+            </div>
+            <div class="pillar-card">
+              <span class="label-voice">Momento 2</span>
+              <h4 class="subhead">Ejecución</h4>
+              <p>Se aborda la propuesta individualmente, en parejas o en gran grupo mediante diálogo común, respetando el ritmo personal.</p>
+            </div>
+            <div class="pillar-card">
+              <span class="label-voice">Momento 3</span>
+              <h4 class="subhead">Contrastación</h4>
+              <p>Se contrastan ideas mediante diálogo: trabajo individual se contrasta en parejas; trabajo en parejas se contrasta en grupos de cuatro.</p>
+            </div>
+            <div class="pillar-card">
+              <span class="label-voice">Momento 4</span>
+              <h4 class="subhead">Exposición</h4>
+              <p>Participación libre en gran grupo. Con preguntas del docente se canalizan conjeturas y se recogen las estrategias reconocidas como válidas.</p>
+            </div>
+            <div class="pillar-card">
+              <span class="label-voice">Momento 5</span>
+              <h4 class="subhead">Finalización</h4>
+              <p>Se anotan por escrito las conclusiones conceptuales y procedimentales obtenidas para reutilizarlas en futuros retos.</p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- =========================================================
+           TAB 3: LOS 6 METAMODELOS
+           ========================================================= -->
+      <section id="panel-metamodelos" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-metamodelos">
+        <div class="section-head">
+          <div>
+            <span class="label-voice">Clasificación científica de procedimientos mentales</span>
+            <h2 class="misregister section-title">Los 6 metamodelos y sus 49 modelos</h2>
+          </div>
+          <span class="stamp stamp-yellow">Observación → Experimentación → Observación</span>
+        </div>
+
+        <div class="grid-2-asym">
+          <article class="ink-block">
+            <span class="stamp">¿Qué es un metamodelo?</span>
+            <p style="margin-top: var(--space-sm);">
+              Más que buscar desafíos al azar en problemas cerrados, la metodología propone <strong>construir el problema desde bloques de desafíos</strong>. Un metamodelo es el conjunto de clases de situaciones problemáticas distintas capaces de generar ideas válidas en la mente del escolar.
+            </p>
+            <p style="margin-top: var(--space-sm);">
+              De estos <strong>6 metamodelos procedimentales</strong> nacen <strong>49 modelos concretos</strong> que obligan al alumnado a transitar por todas las relaciones posibles entre los cuatro elementos del problema: <strong>Enunciado (E)</strong>, <strong>Pregunta (P)</strong>, <strong>Proceso de resolución (R)</strong> y <strong>Solución (S)</strong>.
+            </p>
+          </article>
+
+          <article class="ink-block-blue">
+            <h3 class="subhead" style="margin-bottom: var(--space-sm);">Distribución de los 49 modelos</h3>
+            <div class="chart-wrap" style="min-height: 240px; height: 240px;">
+              <canvas id="metamodelsChart" aria-label="Distribución de los 49 modelos por metamodelo"></canvas>
+            </div>
+          </article>
+        </div>
+
+        <!-- Interactive 6 Metamodels Grid + Inspector -->
+        <div style="display: grid; gap: var(--space-md);">
+          <div class="meta-selector-grid" id="metamodel-selector" role="tablist" aria-label="Selector de los 6 metamodelos"></div>
+
+          <article class="ink-block-yellow" id="metamodel-inspector" aria-live="polite">
+            <!-- Populated by JS -->
+          </article>
+        </div>
+
+        <!-- Laboratorio de Reversibilidad E-P-R-S -->
+        <article class="ink-block">
+          <div class="section-head" style="margin-bottom: var(--space-md);">
+            <div>
+              <span class="label-voice">Laboratorio combinatorio E · P · R · S</span>
+              <h3 class="subhead">Diseña un desafío variando qué partes das al alumnado</h3>
+            </div>
+            <span class="magenta-note">Activa o desactiva piezas dadas</span>
+          </div>
+
+          <div class="grid-2-eq">
+            <div style="display: grid; gap: var(--space-md);">
+              <p>
+                Marca qué elementos proporcionas en la pizarra (<strong>Enunciado</strong>, <strong>Pregunta</strong>, <strong>Resolución/Operación</strong> o <strong>Solución</strong>) para descubrir qué metamodelo estás activando y qué ejemplo puedes plantear hoy:
+              </p>
+              <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm);" id="eprs-toggles">
+                <button type="button" class="eprs-toggle given" data-part="E" onclick="toggleEprsPart('E')">E · Enunciado</button>
+                <button type="button" class="eprs-toggle" data-part="P" onclick="toggleEprsPart('P')">P · Pregunta</button>
+                <button type="button" class="eprs-toggle" data-part="R" onclick="toggleEprsPart('R')">R · Resolución / Operación</button>
+                <button type="button" class="eprs-toggle given" data-part="S" onclick="toggleEprsPart('S')">S · Solución</button>
+              </div>
+
+              <!-- SVG Diagram of E-P-R-S Structure -->
+              <svg viewBox="0 0 460 120" width="100%" height="120" role="img" aria-label="Esquema estructural E-P-R-S" style="max-width: 460px;">
+                <rect x="8" y="22" width="90" height="72" rx="6" fill="var(--surface-container-high)" stroke="var(--outline)" stroke-width="2.5" id="svg-box-E"></rect>
+                <text x="53" y="54" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="22" fill="var(--on-surface)" id="svg-txt-E">E</text>
+                <text x="53" y="76" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="var(--on-surface)">ENUNCIADO</text>
+
+                <line x1="98" y1="58" x2="124" y2="58" stroke="var(--outline)" stroke-width="2.5"></line>
+
+                <rect x="124" y="22" width="90" height="72" rx="6" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2.5" id="svg-box-P"></rect>
+                <text x="169" y="54" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="22" fill="var(--on-surface)" id="svg-txt-P">P</text>
+                <text x="169" y="76" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="var(--on-surface)">PREGUNTA</text>
+
+                <line x1="214" y1="58" x2="240" y2="58" stroke="var(--outline)" stroke-width="2.5"></line>
+
+                <rect x="240" y="22" width="90" height="72" rx="6" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2.5" id="svg-box-R"></rect>
+                <text x="285" y="54" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="22" fill="var(--on-surface)" id="svg-txt-R">R</text>
+                <text x="285" y="76" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="var(--on-surface)">PROCESO</text>
+
+                <line x1="330" y1="58" x2="356" y2="58" stroke="var(--outline)" stroke-width="2.5"></line>
+
+                <rect x="356" y="22" width="90" height="72" rx="6" fill="var(--surface-container-high)" stroke="var(--outline)" stroke-width="2.5" id="svg-box-S"></rect>
+                <text x="401" y="54" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="22" fill="var(--on-surface)" id="svg-txt-S">S</text>
+                <text x="401" y="76" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" fill="var(--on-surface)">SOLUCIÓN</text>
+              </svg>
+            </div>
+
+            <div class="ink-block-recessed" id="eprs-result-box" aria-live="polite" style="display: grid; gap: var(--space-sm);">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- =========================================================
+           TAB 4: GUÍA DE AULA PARA DOCENTES
+           ========================================================= -->
+      <section id="panel-guia" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-guia">
+        <div class="section-head">
+          <div>
+            <span class="label-voice">Didáctica práctica y gestión del diálogo</span>
+            <h2 class="misregister section-title">Guía de aula para el profesorado</h2>
+          </div>
+          <span class="stamp">El arte de preguntar</span>
+        </div>
+
+        <!-- Principios de Stenhouse + Arte de preguntar -->
+        <div class="grid-2-eq">
+          <article class="ink-block" style="display: grid; gap: var(--space-md);">
+            <div>
+              <span class="stamp">Grupo-aula</span>
+              <h3 class="subhead" style="margin-top: var(--space-sm);">Los 3 principios de Stenhouse en el aula</h3>
+            </div>
+            <p>
+              La resolución de problemas se construye en un sistema de relaciones socio-afectivas donde no se pierde al alumnado de menor ritmo ni se condena al más capaz a ejercicios repetitivos:
+            </p>
+            <ol class="list-clean">
+              <li><strong>Diálogo en vez de instrucción:</strong> La actividad central del aula es deliberar y contrastar conjeturas, no dictar procedimientos cerrados.</li>
+              <li><strong>Proteger la divergencia:</strong> Respetar puntos de vista y estrategias distintas; la unicidad lógica nace desde la pluralidad de alternativas.</li>
+              <li><strong>Neutralidad de procedimiento:</strong> El maestro escucha, repregunta con ejemplos y contraejemplos, y no sustituye la evidencia por un «bien» o «mal».</li>
+            </ol>
+          </article>
+
+          <article class="ink-block-yellow" style="display: grid; gap: var(--space-md);">
+            <div>
+              <span class="stamp">Contraste crítico</span>
+              <h3 class="subhead" style="margin-top: var(--space-sm);">Por qué fallan las ayudas tradicionales</h3>
+            </div>
+            <div class="riso-table-wrap">
+              <table class="riso-table">
+                <thead>
+                  <tr>
+                    <th>Ayuda habitual</th>
+                    <th>Limitación detectada</th>
+                    <th>Alternativa efectiva</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>«Explícalo con tus palabras»</td>
+                    <td>¿Cómo va a explicarlo si ni siquiera comprende el vocabulario o la situación?</td>
+                    <td>Partir de la invención libre y reconstruir el problema desde una pregunta o solución.</td>
+                  </tr>
+                  <tr>
+                    <td>«Recuerda uno parecido»</td>
+                    <td>Invita a aplicar al azar el algoritmo más reciente visto en clase.</td>
+                    <td>Trabajar la estructura y expresar una misma relación lógica de formas distintas.</td>
+                  </tr>
+                  <tr>
+                    <td>«Inventa uno más fácil»</td>
+                    <td>El niño baja las cifras sin entender la relación: «Me sobraron 15 € de 10 € que tenía».</td>
+                    <td>Dominar primero la invención-reconstrucción cualitativa y la relación entre partes.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+
+        <!-- Itinerario de Fases 0 a 6 (Secuenciación progresiva) -->
+        <article class="ink-block-blue" style="display: grid; gap: var(--space-md);">
+          <div>
+            <span class="stamp">Secuenciación didáctica</span>
+            <h3 class="subhead" style="margin-top: var(--space-sm);">Itinerario progresivo de implantación (Fases 0 a 6)</h3>
+            <p style="margin-top: var(--space-xs); color: var(--on-surface-variant);">
+              Despliega cada fase para consultar su duración estimada, objetivo clave y actividad disparadora para Primaria:
+            </p>
+          </div>
+          <div id="itinerary-accordion" style="display: grid; gap: var(--space-sm);"></div>
+        </article>
+
+        <!-- 3 Juegos de aula -->
+        <div>
+          <div style="margin-bottom: var(--space-md);">
+            <span class="label-voice">Dinámicas lúdicas estructuradas</span>
+            <h3 class="subhead">Tres juegos listos para dinamizar la sesión</h3>
+          </div>
+          <div class="card-grid ink-block-alt-grid">
+            <article class="ink-item" style="display: grid; gap: var(--space-sm);">
+              <span class="stamp">Juego 1 · Tarjetas Verde / Rojo</span>
+              <h4 class="subhead">¿Se puede responder con esta historia?</h4>
+              <p>
+                El docente narra una historia breve (sin números en Fase 1, o con datos numéricos en Fase 3) y formula una pregunta. En silencio, cada alumno muestra <strong>papel verde</strong> si puede responderse con la historia, o <strong>papel rojo</strong> si faltan datos. Luego se invierten los papeles: el maestro enseña un color y el alumnado inventa una pregunta acorde.
+              </p>
+            </article>
+
+            <article class="ink-item" style="display: grid; gap: var(--space-sm);">
+              <span class="stamp">Juego 2 · Conquista de 3 Planetas</span>
+              <h4 class="subhead">Tríos de invención cualitativa</h4>
+              <p>
+                Por tríos y con tres palabras clave dadas (p. ej., <em>árbol, pipas, astronauta</em>): el alumno 1 cuenta la historia (viaje espacial), el alumno 2 formula una pregunta (aterrizaje) y el alumno 3 responde sin usar números, extrayendo solo la información contada (bandera). El resto de la clase valida historia, pregunta y respuesta.
+              </p>
+            </article>
+
+            <article class="ink-item" style="display: grid; gap: var(--space-sm);">
+              <span class="stamp">Juego 3 · Carrera de Fichas</span>
+              <h4 class="subhead">Relevos por equipos con documentación</h4>
+              <p>
+                Se colocan fichas informativas en mesas alejadas del grupo. El maestro escribe una pregunta en la pizarra. Reglas: 1) Solo sale una persona por equipo; 2) Al oír la palmada (menos de 1 min) vuelven al instante; 3) Prohibido llevar papel o lápiz a las fichas (el grupo sí anota); 4) No repite quien ya salió hasta rotar todo el equipo.
+              </p>
+            </article>
+          </div>
+        </div>
+
+        <!-- Checklist interactivo del docente + notas guardadas -->
+        <article class="ink-block" style="display: grid; gap: var(--space-md);">
+          <div class="section-head">
+            <div>
+              <span class="label-voice">Autoevaluación de práctica docente · Se guarda automáticamente</span>
+              <h3 class="subhead">Lista de comprobación antes y durante la clase</h3>
+            </div>
+            <div style="display: flex; gap: var(--space-sm); align-items: center; flex-wrap: wrap;">
+              <span class="status-note" id="checklist-progress-badge">0 / 6 pautas activas</span>
+              <button type="button" class="btn btn-secondary" onclick="exportTeacherGuide()">
+                <i data-lucide="download" aria-hidden="true"></i>
+                <span>Exportar pautas (.txt)</span>
+              </button>
+              <button type="button" class="btn btn-ghost" id="reset-checklist-btn" onclick="resetTeacherNotes(this)">Reiniciar</button>
+            </div>
+          </div>
+
+          <div class="grid-2-eq">
+            <div id="teacher-checklist-container"></div>
+
+            <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+              <div class="field-group">
+                <label class="label-voice" for="teacher-session-note">Notas de observación para tu próxima sesión</label>
+                <textarea id="teacher-session-note" class="field-textarea" rows="6" placeholder="Ej.: Probar el viernes con 3.º B el problema de la frutería sin pregunta para trabajar las magnitudes..." oninput="saveTeacherNote(this.value)"></textarea>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="magenta-note" id="save-state-indicator">Estado listo</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- =========================================================
+           TAB 5: BANCO DE SITUACIONES PROBLEMÁTICAS
+           ========================================================= -->
+      <section id="panel-banco" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-banco">
+        <div class="section-head">
+          <div>
+            <span class="label-voice">18 actividades auténticas clasificadas por metamodelo</span>
+            <h2 class="misregister section-title">Banco de situaciones problemáticas</h2>
+          </div>
+          <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap; align-items: center;">
+            <span class="status-note" id="bank-count-badge">Mostrando 18 situaciones</span>
+            <button type="button" class="btn btn-primary" onclick="exportFilteredProblems()">
+              <i data-lucide="file-text" aria-hidden="true"></i>
+              <span>Descargar selección (.txt)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <article class="ink-block-yellow">
+          <div class="bank-controls">
+            <div class="field-group">
+              <label class="label-voice" for="filter-metamodel">Metamodelo</label>
+              <select id="filter-metamodel" class="field-select" onchange="applyBankFilters()">
+                <option value="all">Todos los metamodelos</option>
+                <option value="Generativos">1. Generativos</option>
+                <option value="Estructuración">2. Estructuración</option>
+                <option value="Enlaces">3. Enlaces</option>
+                <option value="Transformación">4. Transformación</option>
+                <option value="Composición">5. Composición</option>
+                <option value="Interconexión">6. Interconexión</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="label-voice" for="filter-type">Tipo de situación</label>
+              <select id="filter-type" class="field-select" onchange="applyBankFilters()">
+                <option value="all">Todos los formatos</option>
+                <option value="Sin números">Situaciones sin números</option>
+                <option value="Cualitativa / Incompleta">Cualitativa / Incompleta</option>
+                <option value="Enunciado sin pregunta">Enunciado sin pregunta</option>
+                <option value="Pregunta sin enunciado">Pregunta sin enunciado</option>
+                <option value="Construcción inversa">Construcción inversa (Solución / Expresión)</option>
+                <option value="Transformación y error">Transformación, falacia y mezcla</option>
+                <option value="Composición">Detective numérico y composición</option>
+                <option value="Interconexión y lógica">Vocabulario, fichas, poesía y lógica</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="label-voice" for="filter-cycle">Ciclo recomendado</label>
+              <select id="filter-cycle" class="field-select" onchange="applyBankFilters()">
+                <option value="all">Toda Primaria (6–12 años)</option>
+                <option value="1.º Ciclo (6–8 años)">1.º Ciclo (6–8 años)</option>
+                <option value="2.º Ciclo (8–10 años)">2.º Ciclo (8–10 años)</option>
+                <option value="3.º Ciclo (10–12 años)">3.º Ciclo (10–12 años)</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label class="label-voice" for="filter-search">Buscar por palabra</label>
+              <input type="search" id="filter-search" class="field-input" placeholder="pelota, cromos, panadería, calles..." oninput="applyBankFilters()">
+            </div>
+
+            <div style="display: flex; gap: var(--space-xs); align-items: end;">
+              <button type="button" class="btn btn-ghost" id="toggle-worked-only" onclick="toggleWorkedFilter()">Solo trabajadas</button>
+              <button type="button" class="btn btn-ghost" onclick="clearBankFilters()">Limpiar</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Tarjetas del Banco -->
+        <div class="card-grid" id="bank-cards-container"></div>
+      </section>
+    </main>
+
+    <footer class="footer-colophon">
+      <div>
+        <strong>Fuentes bibliográficas integradas:</strong> José Antonio Fernández Bravo, <em>Modelos para resolver problemas matemáticos. Metacognición y creatividad</em> (Edelvives, 2014; resumen de <em>Resolución de problemas matemáticos. Creatividad y razonamiento en la mente de los niños</em>, Grupo Mayéutica, 2010); y José Antonio Fernández Bravo &amp; Juan Jesús Barbarán Sánchez, «Incidencia de la invención y reconstrucción de problemas en la competencia matemática», <em>Revista Iberoamericana de Educación Matemática (Unión)</em>, n.º 32, diciembre de 2012.
+      </div>
+      <div class="label-voice">Recurso didáctico interactivo · Educación Primaria</div>
+    </footer>
+  </div>
+
+  <api-shim></api-shim>
+
+  <script>
+    /* ======================================================================
+       DATA SOURCES (100% grounded in Fernández Bravo 2010/2014 & 2012)
+       ====================================================================== */
+
+    const ERRORS_DATA = [
+      {
+        id: `err1`,
+        short: `1. Ignorar magnitudes`,
+        title: `1. Pasar por alto las unidades o los elementos de la magnitud`,
+        manifestation: `El alumnado mezcla precios en céntimos con piezas de fruta o kilogramos con litros sin comprobar qué expresa el enunciado frente a la pregunta.`,
+        challenge: `Proponer el enunciado de la frutería (kg de manzanas, naranjas, peras y número de piezas por kg) sin pregunta alguna o con cubos de kg frente a litros (Modelo 27) para hacer visible la magnitud.`
+      },
+      {
+        id: `err2`,
+        short: `2. Intuir la pregunta`,
+        title: `2. Intuir lo que se pregunta sin leer el contenido real`,
+        manifestation: `Tras leer las primeras líneas del enunciado, dan por hecho qué se les va a pedir y comienzan a calcular antes de terminar la lectura.`,
+        challenge: `Trabajar con Metamodelos de Enlaces (Modelos 10–13): dar un mismo enunciado y pedir múltiples preguntas distintas (unas con operación, otras sin operación o imposibles de responder).`
+      },
+      {
+        id: `err3`,
+        short: `3. Palabras clave`,
+        title: `3. Aplicar operaciones mediante asociación lingüística`,
+        manifestation: `Asocian mecánicamente «quedan» con restar o «en total» con sumar, aunque la estructura lógica exija lo contrario.`,
+        challenge: `Modelo 16: plantear dos veces exactamente la misma pregunta («¿Cuántas gallinas hay dentro del corral?») exigiendo que un enunciado se resuelva sumando y otro restando.`
+      },
+      {
+        id: `err4`,
+        short: `4. Orden y todos los datos`,
+        title: `4. Operar los datos en el orden de aparición y usarlos todos`,
+        manifestation: `Creen que todo número escrito en el texto debe entrar en la cuenta y en el mismo orden lineal de lectura.`,
+        challenge: `Modelo 8 y Modelo 9: exigir un problema donde haya explícitamente un dato numérico no significativo, o cambiar datos de sitio (Modelo 36).`
+      },
+      {
+        id: `err5`,
+        short: `5. Buscar operación siempre`,
+        title: `5. Buscar constantemente una operación aunque no sea necesaria`,
+        manifestation: `Si no hacen una cuenta sienten que no han resuelto el problema, incluso cuando la respuesta es cualitativa o deductiva.`,
+        challenge: `Metamodelos Generativos (Modelos 1 y 5): situaciones sin números ni algoritmos, donde solo el razonamiento lógico y las variables determinan la respuesta.`
+      },
+      {
+        id: `err6`,
+        short: `6. Solución a toda costa`,
+        title: `6. Buscar una solución a toda costa, por absurda que sea`,
+        manifestation: `Prefieren inventar un número cualquiera antes que reconocer que faltan datos o que no existe pregunta.`,
+        challenge: `Fase 3 (Enunciados sin pregunta) y Modelo 13 con respuestas «No se puede saber con los datos de que se dispone».`
+      },
+      {
+        id: `err7`,
+        short: `7. Último tema visto`,
+        title: `7. Aplicar la última operación vista en clase`,
+        manifestation: `Si la semana es de multiplicaciones, multiplican todos los problemas sin analizar la relación real entre los datos.`,
+        challenge: `Mezclar en una misma sesión situaciones aditivas, multiplicativas, cualitativas y sin solución (Modelos 34 y 46).`
+      },
+      {
+        id: `err8`,
+        short: `8. Números elevados`,
+        title: `8. Fallar cuando los datos son números grandes`,
+        manifestation: `Comprenden la relación con números pequeños (5 y 3), pero pierden la estrategia cuando aparecen cantidades mayores (536 000 céntimos).`,
+        challenge: `Modelo 24: partir de un problema sencillo accesible a todos e ir sustituyendo los datos por otros equivalentes más complejos manteniendo invariable la solución.`
+      }
+    ];
+
+    const PHASES_DATA = [
+      {
+        num: 1,
+        name: `Querer`,
+        tag: `Disposición emocional`,
+        goal: `Despertar la voluntad y el deseo genuino de enfrentarse al reto. Si el alumno no quiere resolver el problema, las fases siguientes pierden fuerza.`,
+        studentAction: `Acepta el desafío con curiosidad y sin miedo al ridículo ni a la nota.`,
+        teacherRole: `Proponer situaciones cercanas a su vocabulario y experiencias, incluso teatralizadas o en forma de juego, evitando la rutina mecánica.`,
+        example: `Reto inicial: «Hoy necesitamos inventar una historia de cromos entre tres amigos en la que la respuesta exacta sea 43. ¿Quién se atreve a imaginarla?»`
+      },
+      {
+        num: 2,
+        name: `Comprender`,
+        tag: `Fotografía mental`,
+        goal: `Provocar la necesidad de entender qué tengo, qué me piden y adónde tengo que llegar.`,
+        studentAction: `Proyecta una fotografía mental del problema y distingue lo esencial de lo accidental sin precipitarse a calcular.`,
+        teacherRole: `Asegurar que el lenguaje es claro y preciso; no traducir el problema por el alumno ni señalarle «la operación que toca».`,
+        example: `Análisis de la pregunta «¿Cuántos cromos tienen entre los tres amigos?» con solución 43: comprenden que 43 es el total reunido entre tres personas.`
+      },
+      {
+        num: 3,
+        name: `Formular Ideas`,
+        tag: `Observación e intuición`,
+        goal: `Inferir condiciones lógicas a partir de los datos y restricciones antes de trazar ningún plan de cálculo.`,
+        studentAction: `Formula hipótesis lógicas: «Los datos numéricos son menores que 43», «Dos amigos pueden tener los mismos cromos, pero los tres no pueden tener igual cantidad», «Al menos uno tiene menos que los otros dos».`,
+        teacherRole: `Recoger en la pizarra las conjeturas del grupo, propiciando la observación y la intuición mediante preguntas abiertas.`,
+        example: `Descartar imposibles antes de inventar: «¿Podrían tener 15 cada uno?» → No, porque 15 × 3 = 45, distinto de 43 (y 43 no es divisible entre 3).`
+      },
+      {
+        num: 4,
+        name: `Investigar`,
+        tag: `Reversibilidad y flexibilidad`,
+        goal: `Potenciar la generación autónoma de estrategias y caminos de solución por parte del alumno, no del profesor.`,
+        studentAction: `Explora alternativas, aplica su memoria, flexibilidad y reversibilidad de pensamiento (sumar partes o restar desde 43).`,
+        teacherRole: `Dar tiempo suficiente al ritmo individual y en pequeño grupo; intervenir solo con contraejemplos si surge una incoherencia lógica.`,
+        example: `Un grupo parte de 20 + 13 + 10 = 43; otro plantea que tenían 50 y perdieron 7 entre los tres; otro incluye un dato distractor sobre el precio del sobre.`
+      },
+      {
+        num: 5,
+        name: `Comunicar`,
+        tag: `Diálogo y autonomía`,
+        goal: `Exponer el proceso de resolución ante los compañeros para someterlo a contrastación crítica.`,
+        studentAction: `Explica cómo pensó, defiende sus decisiones creativas y acepta refutaciones razonadas con tolerancia y respeto.`,
+        teacherRole: `Mantener la neutralidad de procedimiento y moderar el turno de palabra para construir conocimiento colectivo.`,
+        example: `Un niño expone: «Puse 12, 12 y 19». Otro verifica: «12 + 12 = 24, más 19 son 43, y dos repiten cantidad como habíamos deducido».`
+      },
+      {
+        num: 6,
+        name: `Sacar Conclusiones`,
+        tag: `Metacognición objetivada`,
+        goal: `Registrar por qué funcionó o falló la estrategia y qué métodos válidos surgieron en clase para futuros problemas.`,
+        studentAction: `Anota falacias detectadas, calidad de su comprensión y técnicas empleadas (ensayo y error, generalización, analogía, particularización, empezar desde atrás).`,
+        teacherRole: `Convertir las conclusiones del aula en herramientas transferibles; valorar el aprendizaje más allá de una calificación.`,
+        example: `Conclusión del grupo: «Si conozco el total (43) de tres sumandos, puedo fijar dos menores y hallar el tercero restando al total».`
+      }
+    ];
+
+    const METAMODELS_DATA = [
+      {
+        id: `generativos`,
+        name: `1. Generativos`,
+        range: `Modelos 1 – 5`,
+        count: 5,
+        focus: `Pensamiento antes que cálculo`,
+        benefits: [
+          `Desarrollan la confianza y la seguridad personal al eliminar la presión inicial del algoritmo.`,
+          `La operación queda subordinada al pensamiento, generando divergencia y flexibilidad.`,
+          `En las situaciones presentadas el número no existe o es secundario.`,
+          `Fomentan la atención, actitud crítica, tolerancia y solidaridad ante las ideas ajenas.`
+        ],
+        models: [
+          `1. Resolver situaciones sin números.`,
+          `2. Trabajar con informaciones para hacer deducciones (lógicas/no lógicas, posibles/imposibles).`,
+          `3. Plantear situaciones cualitativas (enunciado incompleto que se completa según pide el alumno).`,
+          `4. Incorporar enunciados abiertos a partir de una frase, foto, titular o dibujo.`,
+          `5. Presentar problemas de lógica (deducción, inducción y analogía sin algoritmo).`
+        ],
+        sample: `«Se dejan caer una pelota que está encima de un armario y otra que está encima de una silla. ¿Qué pelota llegará antes al suelo?» (Variables: tiempo de caída, posición relativa, altura real).`
+      },
+      {
+        id: `estructuracion`,
+        name: `2. Estructuración`,
+        range: `Modelos 6 – 9`,
+        count: 4,
+        focus: `Arquitectura Enunciado · Pregunta · Proceso · Solución`,
+        benefits: [
+          `Ayudan a estructurar mentalmente las cuatro partes que componen todo problema y su no arbitrariedad.`,
+          `Distinguen la solución del proceso de resolución, usando la reversibilidad operativa para verificar.`,
+          `Muestran que un mismo resultado nace de situaciones distintas: donde uno suma, otro resta.`,
+          `Demuestran que una misma expresión matemática genera una amplia diversidad de contextos.`
+        ],
+        models: [
+          `6. Inventar y resolver un problema a partir de una solución dada.`,
+          `7. Inventar y resolver un problema a partir de una expresión matemática.`,
+          `8. Inventar y resolver cumpliendo dos condiciones (operaciones + solución con dato no significativo).`,
+          `9. Llegar a una solución dada usando todos o solo parte de los datos numéricos ofrecidos.`
+        ],
+        sample: `«Inventa un problema que se resuelva mediante la expresión matemática: (16 + 7 – 4) × 5» o «Inventa un problema cuya solución sea 16 páginas».`
+      },
+      {
+        id: `enlaces`,
+        name: `3. Enlaces`,
+        range: `Modelos 10 – 22`,
+        count: 13,
+        focus: `Concordancia lógica entre partes`,
+        benefits: [
+          `Trabajan la concordancia sintáctica, lógica, matemática y de experiencia real entre enunciado, pregunta y solución.`,
+          `Rompen la dependencia mecánica de palabras clave («quedan» = restar).`,
+          `Desarrollan la atención y la prudencia: ni todos los datos son numéricos ni todos los problemas tienen números.`
+        ],
+        models: [
+          `10–13. Formular preguntas desde un enunciado (libres, según operación, según expresión o según solución dada).`,
+          `14–18. Inventar enunciado para una pregunta dada (con solución, con operación, con proceso o con selección de datos).`,
+          `19–22. Inventar un único enunciado que responda a varias preguntas (con operaciones, soluciones o datos compartidos).`
+        ],
+        sample: `«Crea un enunciado distinto para cada caso con la misma pregunta: ¿Cuántas gallinas hay dentro del corral? — Caso A: suma · Caso B: resta.»`
+      },
+      {
+        id: `transformacion`,
+        name: `4. Transformación`,
+        range: `Modelos 23 – 39`,
+        count: 17,
+        focus: `Análisis, síntesis y dinamismo mental`,
+        benefits: [
+          `Consolidan conceptos matemáticos variando condiciones y observando qué cambia y qué permanece.`,
+          `Ponen foco en las magnitudes involucradas (euros, kg, litros, tiempo).`,
+          `Emplean análisis y síntesis para comparar estrategias y autocorregirse.`
+        ],
+        models: [
+          `23–25. Cambiar datos para variar o mantener la solución; suprimir información superflua.`,
+          `26–29. Cambiar tiempos verbales; corregir el enunciado para validar la resolución; detectar el dato falso; cambiar la pregunta manteniendo la solución.`,
+          `30–33. Reordenar proposiciones; cambiar «y» por «o»; negar proposiciones y adaptar la pregunta.`,
+          `34–39. Emparejar enunciados y expresiones; descifrar preguntas, datos, enunciados o procesos mezclados; unificar varias preguntas en una.`
+        ],
+        sample: `«El cubo rosa tiene 8 kg, el azul 12 kg y el verde 15 kg. Resolución dada: 8 litros + 12 litros + 15 litros = 35 litros caben en los tres cubos llenos. Cambia solo lo necesario para que sea correcta.»`
+      },
+      {
+        id: `composicion`,
+        name: `5. Composición`,
+        range: `Modelos 40 – 42`,
+        count: 3,
+        focus: `El problema como un todo reversible`,
+        benefits: [
+          `Propician la emisión de juicios desde relaciones múltiples y el método analítico-sintético.`,
+          `Desarrollan memoria, observación, capacidad de demostración y pensamiento reversible.`,
+          `Obligan a leer el enunciado con atención tantas veces como sea necesario.`
+        ],
+        models: [
+          `40. Componer el enunciado de uno o varios problemas colocando datos sueltos («detective numérico»).`,
+          `41. Completar los datos borrados del enunciado a partir del proceso de resolución dado.`,
+          `42. Completar los datos borrados del enunciado a partir de las soluciones dadas.`
+        ],
+        sample: `«Sofía compra __ sobres. En cada sobre deben venir __ cromos, pero le han dado __ sobres vacíos. Resolución: 17 – 3 = 14; 14 × 7 = 98 cromos.»`
+      },
+      {
+        id: `interconexion`,
+        name: `6. Interconexión`,
+        range: `Modelos 43 – 49`,
+        count: 7,
+        focus: `Originalidad, vida real y lógica`,
+        benefits: [
+          `Aportan interdisciplinariedad y transversalidad conectando lengua, entorno social y matemáticas.`,
+          `Ayudan a distinguir entre lo necesario y lo suficiente en el razonamiento.`,
+          `Despiertan la imaginación presentando retos en poesía, fichas reales, tablas o enigmas lógicos.`
+        ],
+        models: [
+          `43–45. Inventar problemas con vocabulario específico (libre, con operación dada o con solución dada).`,
+          `46. Resolver situaciones cotidianas completas (solución única, múltiple o abierta).`,
+          `47. Seleccionar información necesaria consultando fichas documentales en equipo.`,
+          `48–49. Formatos inusuales (poesía, caligrama, tabla, agenda borrada) y relación directa lógica-matemática.`
+        ],
+        sample: `«Inventa y resuelve un problema incluyendo en el enunciado: doble, radiador y abril; y en la pregunta: mes, día y agua.»`
+      }
+    ];
+
+    const ITINERARY_PHASES = [
+      {
+        title: `Fase 0 · Lógica y condicionales`,
+        time: `Inicio transversal`,
+        desc: `Transformar frases cotidianas y de cuentos en condicionales («si..., entonces...», «si y solo si...»). Inferir verdades y falsedades afirmando y negando antes de cuantificar.`,
+        activity: `Ejemplo: «Si es un polígono de 3 lados, entonces y solo entonces es triángulo.» Trabajar las 4 inferencias (sí es, no es, es triángulo, no es triángulo).`
+      },
+      {
+        title: `Fase 1 · Problemas sin número`,
+        time: `≈ 3 sesiones de 40 min`,
+        desc: `Entender intuitivamente qué es un «dato», distinguir lo esencial de lo accidental y asumir que resolver es demostrar la respuesta mediante razonamiento, sin operaciones.`,
+        activity: `Juego de tarjetas Verde/Rojo y situaciones abiertas como «Juan vive cerca del colegio y Marta lejos. ¿Quién llegará antes?»`
+      },
+      {
+        title: `Fase 2 · Problemas incompletos`,
+        time: `≈ 4 sesiones de 40 min`,
+        desc: `Descubrir qué variables cualitativas determinan todas las respuestas posibles antes de asignar números.`,
+        activity: `«Roberto tiene billetes de 5 € y Sara billetes de 10 €. ¿Quién tiene más dinero?» (Estudiar casos para que gane Roberto, gane Sara o empaten).`
+      },
+      {
+        title: `Fase 3 · Enunciados sin pregunta`,
+        time: `≈ 3 sesiones de 40 min`,
+        desc: `Tomar conciencia de que sin pregunta no hay problema. Clasificar los datos del enunciado en necesarios/suficientes, insuficientes o superfluos.`,
+        activity: `«Me compro un ordenador por 500 €, una impresora por 100 € y tinta por 30 €.» Esperar a que descubran que falta la pregunta y formular preguntas de distinta complejidad.`
+      },
+      {
+        title: `Fase 4 · Pregunta sin enunciado`,
+        time: `≈ 4 sesiones de 40 min`,
+        desc: `Comprender que toda pregunta exige datos concretos y romper estereotipos entre palabras y operaciones.`,
+        activity: `«¿Cuánto cuestan dos docenas de huevos?» Analizar cualitativamente qué información real de mercado hace falta antes de multiplicar.`
+      },
+      {
+        title: `Fase 5 · Proceso de resolución`,
+        time: `≈ 2 sesiones de 40 min`,
+        desc: `Asociar operaciones a contextos reales. Observar que «la propiedad conmutativa es matemática, no social» (a veces no es lo mismo 5 cubas de 3 litros que 3 cubas de 5 litros).`,
+        activity: `Inventar historias distintas para 5 + 3 y para a × (b : c), analizando cuándo todos los datos son necesarios y cuándo sobran.`
+      },
+      {
+        title: `Fase 6 · Respuesta a la pregunta (construcción inversa)`,
+        time: `≈ 2 sesiones de 40 min`,
+        desc: `Construir enunciado, pregunta y proceso a partir de una solución dada (numérica o cualitativa), demostrando la coherencia del conjunto.`,
+        activity: `«La solución es 36.» Concluir en grupo que si los datos del enunciado son menores que 36, no podremos resolverlo con una sola resta de naturales.`
+      }
+    ];
+
+    const TEACHER_CHECKLIST_ITEMS = [
+      { id: `chk1`, text: `He planteado el reto sin indicar previamente qué operación hay que utilizar.` },
+      { id: `chk2`, text: `He evitado responder con «bien» o «mal», devolviendo la duda con contraejemplos.` },
+      { id: `chk3`, text: `El alumnado ha tenido espacio para dialogar y contrastar estrategias en parejas o grupo.` },
+      { id: `chk4`, text: `Hemos revisado si todos los datos eran necesarios o si faltaba alguna magnitud/pregunta.` },
+      { id: `chk5`, text: `Hemos valorado el error detectado como descubrimiento compartido para aprender en él.` },
+      { id: `chk6`, text: `Al cerrar la sesión, el grupo ha anotado sus propias conclusiones reutilizables.` }
+    ];
+
+    const BANK_PROBLEMS = [
+      {
+        id: `p1`,
+        metamodel: `Generativos`,
+        type: `Sin números`,
+        cycle: `1.º Ciclo (6–8 años)`,
+        title: `Las dos pelotas: armario y silla`,
+        statement: `Se dejan caer una pelota que está encima de un armario y una pelota que está encima de una silla. ¿Qué pelota llegará antes al suelo?`,
+        questions: `¿Se han dejado caer las dos pelotas a la vez? ¿Dónde estaba colocada la silla? ¿Es siempre el armario más alto que la silla o podría estar la silla sobre una tarima?`,
+        solution: `Depende de variables no especificadas (instante de caída, altura relativa de silla y armario, suelo común). No hay operación; el objetivo es descubrir la necesidad de precisar datos.`
+      },
+      {
+        id: `p2`,
+        metamodel: `Generativos`,
+        type: `Cualitativa / Incompleta`,
+        cycle: `1.º Ciclo (6–8 años)`,
+        title: `Me he quedado sin dinero`,
+        statement: `«Me he quedado sin dinero.» (Enunciado mínimo abierto para elaborar e imaginar).`,
+        questions: `¿Cuánto dinero llevabas al principio? ¿Has comprado algo o lo has prestado? ¿Te quedaste sin dinero antes o después de pagar?`,
+        solution: `Actividad de apertura para construir la historia lógica antes de introducir cantidades concretas y preguntas matemáticas.`
+      },
+      {
+        id: `p3`,
+        metamodel: `Generativos`,
+        type: `Cualitativa / Incompleta`,
+        cycle: `1.º Ciclo (6–8 años)`,
+        title: `Las 30 páginas del libro`,
+        statement: `El lunes empecé un libro y leí las 30 primeras páginas. El martes lo acabé. ¿Qué día leí más páginas de ese libro?`,
+        questions: `¿Qué dato necesitas pedirme para poder responder con seguridad? ¿Cuántas páginas tiene el libro en total?`,
+        solution: `El enunciado está incompleto a propósito: el docente aporta el total de páginas solo cuando el alumnado deduce que lo necesita. Si el libro tiene 60 páginas, empatan; si tiene más de 60, el martes; si tiene menos de 60, el lunes.`
+      },
+      {
+        id: `p4`,
+        metamodel: `Generativos`,
+        type: `Sin números`,
+        cycle: `2.º Ciclo (8–10 años)`,
+        title: `Las tres bolas y los músicos`,
+        statement: `En una bolsa opaca hay tres bolas: verde, roja y amarilla. Tres niños (A, B y C) sacan una cada uno. Quien saque amarilla canta; roja toca el órgano; verde toca la armónica. A dice que sacó la verde; B dice que no sacó la amarilla; C dice que no sacó la roja. Sabiendo que solo miente uno y que A no toca el órgano, averigua qué hace cada uno.`,
+        questions: `¿Qué pasaría si A mintiera? ¿Contradice eso la pista de que A no toca el órgano? Prueba suponiendo quién miente en cada caso.`,
+        solution: `Si A mintiera no tendría verde ni roja (no toca órgano), luego tendría amarilla. Pero entonces B y C dirían la verdad: C tendría verde o amarilla (contradicción si A tiene amarilla). Por tanto A dice la verdad (verde, armónica), C miente (sacó la roja, toca el órgano) y B dice la verdad (amarilla, canta).`
+      },
+      {
+        id: `p5`,
+        metamodel: `Estructuración`,
+        type: `Construcción inversa`,
+        cycle: `1.º Ciclo (6–8 años)`,
+        title: `Solución dada: 16 páginas`,
+        statement: `Inventa el enunciado, la pregunta y el proceso de resolución de un problema cuya solución sea exactamente «16 páginas».`,
+        questions: `¿Se puede resolver sumando? ¿Y restando? ¿Qué condición deben cumplir los números si decides resolverlo mediante una resta de naturales?`,
+        solution: `Pluralidad de soluciones válidas. Ejemplo de conclusión general: si el problema se resuelve restando, el minuendo ha de ser mayor que 16.`
+      },
+      {
+        id: `p6`,
+        metamodel: `Estructuración`,
+        type: `Construcción inversa`,
+        cycle: `2.º Ciclo (8–10 años)`,
+        title: `Desde una expresión matemática`,
+        statement: `Inventa un problema completo (enunciado y pregunta) que se resuelva mediante la siguiente expresión matemática: (16 + 7 – 4) × 5.`,
+        questions: `¿Qué representan 16, 7 y 4 dentro de tu historia? ¿Por qué multiplicas el resultado final por 5? ¿Tiene sentido social el orden de las operaciones?`,
+        solution: `Ejemplo: 5 cajas con 16 manzanas cada una; en cada caja añaden 7 y quitan 4 estropeadas. ¿Cuántas manzanas quedan en total? (Resultado: 95).`
+      },
+      {
+        id: `p7`,
+        metamodel: `Estructuración`,
+        type: `Construcción inversa`,
+        cycle: `2.º Ciclo (8–10 años)`,
+        title: `Dos condiciones y dato distractor`,
+        statement: `Inventa y resuelve un problema con dos operaciones (suma y resta) cuya solución sea 796. Uno de los datos numéricos del enunciado NO debe utilizarse en la resolución.`,
+        questions: `¿Cuál de tus datos es no significativo y por qué aparece de forma natural en la historia sin engañar al lector?`,
+        solution: `Verifica estructura E-P-R-S y enseña a discriminar información relevante frente a ruido numérico.`
+      },
+      {
+        id: `p8`,
+        metamodel: `Enlaces`,
+        type: `Enunciado sin pregunta`,
+        cycle: `2.º Ciclo (8–10 años)`,
+        title: `La frutería sin pregunta`,
+        statement: `Un kilogramo de manzanas cuesta 1 € y 35 cts.; un kg de naranjas, 1 € y 98 cts.; dos kg de peras, 3 € y 46 cts., y un melón, 4 € y 50 cts. En un kg de peras entran unas 5 piezas; en un kg de naranjas, unas 4 piezas… Resuelve el problema.`,
+        questions: `¿Puedes empezar a sumar todos los números? ¿Por qué no se puede resolver tal como está? ¿Qué preguntas distintas podríamos inventar según qué datos queramos usar?`,
+        solution: `Sin pregunta no existe problema. Desmonta el impulso automático de sumar precios con piezas o pesos y clasifica preguntas posibles vs. imposibles.`
+      },
+      {
+        id: `p9`,
+        metamodel: `Enlaces`,
+        type: `Enunciado sin pregunta`,
+        cycle: `2.º Ciclo (8–10 años)`,
+        title: `Los cuadernos de Joaquín (pregunta por operación)`,
+        statement: `Joaquín tiene dos cuadernos de Plástica. El cuaderno 1 es para pintar y cuesta 147 céntimos; el cuaderno 2 es para recortar y cuesta 394 céntimos. Escribe una pregunta para cada operación: (a) Suma, (b) Multiplicación, (c) Resta.`,
+        questions: `Para la multiplicación, ¿qué dato necesitas introducir o suponer en la pregunta (p. ej., varios cuadernos iguales)?`,
+        solution: `(a) ¿Cuánto cuestan los dos juntos? (b) ¿Cuánto costarían 4 cuadernos como el número 1? (c) ¿Cuánto más caro es el cuaderno 2 que el 1?`
+      },
+      {
+        id: `p10`,
+        metamodel: `Enlaces`,
+        type: `Pregunta sin enunciado`,
+        cycle: `1.º Ciclo (6–8 años)`,
+        title: `¿Cuánto cuestan dos docenas de huevos?`,
+        statement: `Responde a esta pregunta: «¿Cuánto cuestan dos docenas de huevos?»`,
+        questions: `¿Qué dato imprescindible falta? ¿Todas las docenas tienen que ser de la misma clase y precio? ¿Qué pasaría si hubiese oferta de 2×1 o distinto tamaño?`,
+        solution: `Trabajo cualitativo sobre variables: precio de una docena, igualdad de clase/tamaño y lugar de compra antes de proponer un precio realista y calcular.`
+      },
+      {
+        id: `p11`,
+        metamodel: `Enlaces`,
+        type: `Pregunta sin enunciado`,
+        cycle: `1.º Ciclo (6–8 años)`,
+        title: `Las gallinas del corral: sumar o restar`,
+        statement: `Inventa un enunciado distinto para cada caso con la misma pregunta: 1) «¿Cuántas gallinas hay dentro del corral?» (Operación: suma). 2) «¿Cuántas gallinas hay dentro del corral?» (Operación: resta).`,
+        questions: `¿Qué cambia en la situación real para que la misma pregunta se resuelva primero sumando y luego restando?`,
+        solution: `Rompe la asociación mecánica entre palabras de la pregunta y operación elegida.`
+      },
+      {
+        id: `p12`,
+        metamodel: `Transformación`,
+        type: `Transformación y error`,
+        cycle: `2.º Ciclo (8–10 años)`,
+        title: `Las compras de Sara (variar para decir «No»)`,
+        statement: `Sara sale de casa con 2 000 céntimos. Gasta 600 céntimos en el cine y 580 céntimos en un taxi para volver. Antes del taxi estuvo de tiendas. Volvió a casa con 240 céntimos. ¿Crees que compró algo en aquellas tiendas? ¿Qué cambiarías del enunciado para que la respuesta fuese «No»?`,
+        questions: `Si no hubiera comprado nada en las tiendas, ¿con cuánto dinero habría regresado a casa?`,
+        solution: `2 000 – (600 + 580) = 820 céntimos; como volvió con 240, sí gastó 580 céntimos en tiendas. Para que la respuesta sea «No», basta cambiar 240 por 820 (o ajustar el dinero inicial/gastos).`
+      },
+      {
+        id: `p13`,
+        metamodel: `Transformación`,
+        type: `Transformación y error`,
+        cycle: `2.º Ciclo (8–10 años)`,
+        title: `Cubos de masa vs. capacidad en litros`,
+        statement: `El cubo rosa tiene una masa de 8 kg; el cubo azul, de 12 kg, y el verde, de 15 kg. ¿Cuántos kilogramos de masa tienen juntos? Resolución presentada: «8 litros + 12 litros + 15 litros = 35 litros caben en los tres cubos llenos». Cambia únicamente lo necesario del problema para que esa resolución sea correcta.`,
+        questions: `¿El fallo está en los números o en las magnitudes del enunciado y de la pregunta?`,
+        solution: `Sustituir «masa de ... kg» por «capacidad de ... litros» y cambiar la pregunta a «¿Cuántos litros caben en los tres cubos llenos?». Trabaja la magnitud.`
+      },
+      {
+        id: `p14`,
+        metamodel: `Transformación`,
+        type: `Transformación y error`,
+        cycle: `3.º Ciclo (10–12 años)`,
+        title: `Negación y conjunción/disyunción`,
+        statement: `Juan es más alto que Marta. Marta es más alta que Arturo. ¿Quién es más bajo? Sol.: Arturo. Ahora niega las dos proposiciones («Juan no es más alto que Marta. Marta no es más alta que Arturo») y cambia la pregunta para que la solución siga siendo «Arturo» (si es posible, o analiza qué ocurre si son iguales).`,
+        questions: `¿«No es más alto que» significa necesariamente «es más bajo que», o podrían medir lo mismo?`,
+        solution: `Permite descubrir la precisión del lenguaje lógico: «no más alto» equivale a «más bajo o igual», por lo que si admitimos igual altura no queda determinado un único más alto sin añadir «distintas alturas».`
+      },
+      {
+        id: `p15`,
+        metamodel: `Composición`,
+        type: `Composición`,
+        cycle: `2.º Ciclo (8–10 años)`,
+        title: `Sofía y los sobres vacíos (desde el proceso)`,
+        statement: `Completa los datos que faltan en el enunciado para que el problema esté bien resuelto: «Sofía se compra __ sobres de cromos. En cada sobre tienen que venir __ cromos; sin embargo, por un error de fábrica, a Sofía le han dado __ sobres vacíos. ¿Cuántos cromos tiene Sofía?» Resolución: 17 – 3 = 14; 14 × 7 = 98 cromos.`,
+        questions: `¿De dónde sale el 17? ¿Qué representa el 3 y qué representa el 7 en la historia?`,
+        solution: `Compra 17 sobres; vienen 7 cromos por sobre; 3 sobres estaban vacíos. Fomenta el pensamiento reversible desde el proceso de cálculo.`
+      },
+      {
+        id: `p16`,
+        metamodel: `Composición`,
+        type: `Composición`,
+        cycle: `2.º Ciclo (8–10 años)`,
+        title: `La panadería sin sal y con sal (desde la solución)`,
+        statement: `Completa los datos que faltan para que las respuestas sean correctas: «A una panadería llegan 87 barras de pan sin sal y __ barras de pan con sal. El establecimiento vende 182 barras de pan con sal y __ barras de pan sin sal.» Pregunta 1: ¿Cuántas barras ha vendido en total? Sol.: 251 barras. Pregunta 2: ¿Cuántas barras llevaron a la panadería? Sol.: 282 barras.`,
+        questions: `¿Qué relación hay entre las barras vendidas de cada tipo y las que llegaron?`,
+        solution: `Vendidas sin sal: 251 – 182 = 69 barras. Llegaron con sal: 282 – 87 = 195 barras.`
+      },
+      {
+        id: `p17`,
+        metamodel: `Interconexión`,
+        type: `Interconexión y lógica`,
+        cycle: `3.º Ciclo (10–12 años)`,
+        title: `El poema del número curioso`,
+        statement: `«Mi cabeza está pensando, / bajo el sol y con sombrero, / un número curioso. ¿Quién lo adivina el primero? / Si lo divido entre dos, / el resultado es par / y también menor que diez. / Juega conmigo a pensar, / que al dividirlo entre tres / dos menos me quedarán.»`,
+        questions: `¿Qué números pares son menores que 10? ¿Qué significa «al dividirlo entre tres, dos menos me quedarán» (el cociente es 2 menos que al dividir entre dos, o el número menos 2)? Analiza las interpretaciones.`,
+        solution: `Si la mitad es par y menor que 10, la mitad puede ser 2, 4, 6 u 8 (número 4, 8, 12 o 16; o 0). Con el número 12: 12 : 2 = 6 (par < 10) y 12 : 3 = 4 (dos menos que 6). ¡El 12 cumple todas las pistas con exactitud!`
+      },
+      {
+        id: `p18`,
+        metamodel: `Interconexión`,
+        type: `Interconexión y lógica`,
+        cycle: `3.º Ciclo (10–12 años)`,
+        title: `¡Qué raras son estas calles!`,
+        statement: `Calle A: no todos los números son pares. Calle B: algunos números son pares. Calle C: ningún número es par. Calle D: son pares todos los que son pares. Calle E: dos números suman 57. Calle F: si se suman sus números dos a dos, siempre da par. Calle G: no hay ninguno de los números de la calle C. Calle H: todos los números son divisibles exactamente entre 2 y 3. En una de estas calles, y solo en una, todos los números son pares. ¿Cuál es?`,
+        questions: `¿Por qué la calle H podría engañar o qué ocurre con la calle G? (Cuidado: si todos los de H son divisibles entre 2 y 3, también son pares; ¿entonces por qué solo en una? Analiza si en H hay números o qué ocurre con G y C).`,
+        solution: `Excelente debate de lógica pura: C (ninguno par = todos impares); G no tiene ningún número de C (luego no tiene impares de C, o puede contener pares). Pero si H tiene números divisibles por 2 y 3, todos son pares... salvo si observamos que E (57 = par + impar) descarta todos pares, F admite todos impares (impar+impar=par), D es tautología, A descarta todos pares, B no garantiza todos. Comparar G y H obliga a argumentar qué números existen en cada calle.`
+      }
+    ];
+
+    /* ======================================================================
+       APP STATE (Persisted via notebookAppApi)
+       ====================================================================== */
+    const APP_STATE = {
+      activeTab: `fundamentos`,
+      selectedErrorId: `err1`,
+      anovaMode: `f`,
+      activePhaseNum: 1,
+      activeMetamodelId: `generativos`,
+      eprsGiven: { E: true, P: false, R: false, S: true },
+      checkedChecklistIds: [],
+      teacherNote: ``,
+      workedProblemIds: [],
+      workedOnlyFilter: false
+    };
+
+    let anovaChartInstance = null;
+    let metamodelsChartInstance = null;
+    let isRestoringState = false;
+
+    async function persistState() {
+      if (isRestoringState) return;
+      const ind = document.getElementById(`save-state-indicator`);
+      if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+        try {
+          await window.notebookAppApi.setAppState({ ...APP_STATE });
+          if (ind) ind.textContent = `Guardado en tu cuaderno`;
+        } catch (err) {
+          if (ind) ind.textContent = `No se pudo sincronizar`;
+        }
+      }
+    }
+
+    /* ======================================================================
+       TAB NAVIGATION
+       ====================================================================== */
+    function switchTab(tabId) {
+      APP_STATE.activeTab = tabId;
+      const tabs = [`fundamentos`, `fases`, `metamodelos`, `guia`, `banco`];
+      tabs.forEach(function (id) {
+        const btn = document.getElementById(`tab-btn-` + id);
+        const panel = document.getElementById(`panel-` + id);
+        if (btn) btn.setAttribute(`aria-selected`, id === tabId ? `true` : `false`);
+        if (panel) {
+          if (id === tabId) panel.classList.add(`active`);
+          else panel.classList.remove(`active`);
+        }
+      });
+
+      if (tabId === `fundamentos` && anovaChartInstance) {
+        anovaChartInstance.resize();
+      }
+      if (tabId === `metamodelos` && metamodelsChartInstance) {
+        metamodelsChartInstance.resize();
+      }
+      persistState();
+    }
+
+    /* ======================================================================
+       TAB 1: 8 ERRORS WIDGET & ANOVA CHART
+       ====================================================================== */
+    function renderErrorChips() {
+      const container = document.getElementById(`error-chips-container`);
+      if (!container) return;
+      container.innerHTML = ERRORS_DATA.map(function (err) {
+        const isActive = err.id === APP_STATE.selectedErrorId;
+        return `<button type="button" class="error-chip ${isActive ? `active` : ``}" onclick="selectError('${err.id}')">${err.short}</button>`;
+      }).join(``);
+      renderErrorDetail();
+    }
+
+    function selectError(errId) {
+      APP_STATE.selectedErrorId = errId;
+      renderErrorChips();
+      persistState();
+    }
+
+    function renderErrorDetail() {
+      const box = document.getElementById(`error-detail-box`);
+      if (!box) return;
+      const item = ERRORS_DATA.find(function (e) { return e.id === APP_STATE.selectedErrorId; }) || ERRORS_DATA[0];
+      box.innerHTML = `
+        <div class="label-voice" style="color: var(--primary);">${item.title}</div>
+        <p style="margin-top: var(--space-xs);"><strong>Cómo aparece en el aula:</strong> ${item.manifestation}</p>
+        <p style="margin-top: var(--space-xs);"><strong>Desafío para superarlo:</strong> ${item.challenge}</p>
+      `;
+    }
+
+    function getCssToken(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function initAnovaChart() {
+      const canvas = document.getElementById(`anovaChart`);
+      if (!canvas || typeof Chart === `undefined`) return;
+
+      const data1 = getCssToken(`--data-1`);
+      const dataCtx = getCssToken(`--data-context`);
+      const ink = getCssToken(`--on-surface`);
+      const gridColor = getCssToken(`--outline-variant`);
+
+      const isF = APP_STATE.anovaMode === `f`;
+      const labels = [
+        `Pensar matemát. (PR)`,
+        `Plantear/resolver (PRPM)`,
+        `Comunicar (COM)`,
+        `Representar (REP)`,
+        `Argumentar (ARG)`
+      ];
+      const values = isF ? [12.66, 10.45, 8.56, 7.63, 6.85] : [96, 99.7, 83, 72, 99.8];
+      const colors = isF
+        ? [data1, data1, dataCtx, dataCtx, data1]
+        : [data1, data1, dataCtx, dataCtx, data1];
+
+      if (anovaChartInstance) {
+        anovaChartInstance.destroy();
+      }
+
+      anovaChartInstance = new Chart(canvas, {
+        type: `bar`,
+        data: {
+          labels: labels,
+          datasets: [{
+            label: isF ? `Razón F (ANOVA)` : `Confianza estadística (%)`,
+            data: values,
+            backgroundColor: colors,
+            borderColor: ink,
+            borderWidth: 2,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: `y`,
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                afterLabel: function (ctx) {
+                  const pVals = [`p = 0,04 (signif.)`, `p = 0,003 (signif.)`, `p = 0,17 (n. s.)`, `p = 0,28 (n. s.)`, `p = 0,002 (signif.)`];
+                  return pVals[ctx.dataIndex] || ``;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              max: isF ? 15 : 105,
+              grid: { color: gridColor },
+              ticks: { color: ink, font: { family: `Space Mono`, size: 11 } }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: ink, font: { family: `Space Mono`, size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    function setAnovaChartMode(mode) {
+      APP_STATE.anovaMode = mode;
+      const btnF = document.getElementById(`chart-mode-f`);
+      const btnSig = document.getElementById(`chart-mode-sig`);
+      if (btnF) btnF.classList.toggle(`btn-active-filter`, mode === `f`);
+      if (btnSig) btnSig.classList.toggle(`btn-active-filter`, mode === `sig`);
+      initAnovaChart();
+      persistState();
+    }
+
+    /* ======================================================================
+       TAB 2: LAS 6 FASES
+       ====================================================================== */
+    function renderPhaseRail() {
+      const rail = document.getElementById(`phase-rail`);
+      if (!rail) return;
+      rail.innerHTML = PHASES_DATA.map(function (ph) {
+        const isActive = ph.num === APP_STATE.activePhaseNum;
+        return `
+          <button type="button" class="phase-step-btn ${isActive ? `active` : ``}" role="tab" aria-selected="${isActive}" onclick="selectPhase(${ph.num})">
+            <span class="label-voice">Fase 0${ph.num}</span>
+            <span style="font-family: var(--font-headline); font-weight: 800; font-size: 1rem;">${ph.name}</span>
+          </button>
+        `;
+      }).join(``);
+      renderPhaseDetail();
+    }
+
+    function selectPhase(num) {
+      APP_STATE.activePhaseNum = num;
+      renderPhaseRail();
+      persistState();
+    }
+
+    function stepPhase(delta) {
+      const next = Math.min(6, Math.max(1, APP_STATE.activePhaseNum + delta));
+      selectPhase(next);
+    }
+
+    function renderPhaseDetail() {
+      const panel = document.getElementById(`phase-detail-panel`);
+      if (!panel) return;
+      const ph = PHASES_DATA.find(function (p) { return p.num === APP_STATE.activePhaseNum; }) || PHASES_DATA[0];
+      panel.innerHTML = `
+        <div style="display: grid; gap: var(--space-md);">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-sm); border-bottom: 2px solid var(--outline); padding-bottom: var(--space-sm);">
+            <div>
+              <span class="stamp">Fase ${ph.num} de 6 · ${ph.tag}</span>
+              <h3 class="subhead" style="margin-top: var(--space-xs); font-size: 1.5rem;">${ph.num}. ${ph.name}</h3>
+            </div>
+            <div style="display: flex; gap: var(--space-xs);">
+              <button type="button" class="btn btn-ghost" onclick="stepPhase(-1)" ${ph.num === 1 ? `disabled` : ``}>Anterior</button>
+              <button type="button" class="btn btn-primary" onclick="stepPhase(1)" ${ph.num === 6 ? `disabled` : ``}>Siguiente fase</button>
+            </div>
+          </div>
+
+          <p style="font-size: 1.05rem;"><strong>Sentido de la fase:</strong> ${ph.goal}</p>
+
+          <div class="grid-2-eq compact-stack">
+            <div class="ink-block-recessed">
+              <div class="label-voice" style="color: var(--primary);">Qué hace el alumnado</div>
+              <p style="margin-top: var(--space-xs);">${ph.studentAction}</p>
+            </div>
+            <div class="ink-block-recessed">
+              <div class="label-voice" style="color: var(--tertiary);">Mediación del docente</div>
+              <p style="margin-top: var(--space-xs);">${ph.teacherRole}</p>
+            </div>
+          </div>
+
+          <div class="problem-statement">
+            <div class="label-voice">Ejemplo vivo en el aula (los tres amigos y los 43 cromos)</div>
+            <p style="margin-top: var(--space-xs);">${ph.example}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ======================================================================
+       TAB 3: LOS 6 METAMODELOS + CHART + E-P-R-S LAB
+       ====================================================================== */
+    function initMetamodelsChart() {
+      const canvas = document.getElementById(`metamodelsChart`);
+      if (!canvas || typeof Chart === `undefined`) return;
+
+      const c1 = getCssToken(`--data-1`);
+      const c2 = getCssToken(`--data-2`);
+      const c3 = getCssToken(`--data-3`);
+      const c4 = getCssToken(`--data-4`);
+      const ink = getCssToken(`--on-surface`);
+      const gridColor = getCssToken(`--outline-variant`);
+
+      if (metamodelsChartInstance) metamodelsChartInstance.destroy();
+
+      metamodelsChartInstance = new Chart(canvas, {
+        type: `bar`,
+        data: {
+          labels: [`Generativos`, `Estructuración`, `Enlaces`, `Transformación`, `Composición`, `Interconexión`],
+          datasets: [{
+            label: `N.º de modelos`,
+            data: [5, 4, 13, 17, 3, 7],
+            backgroundColor: [c1, c3, c2, c1, c4, c2],
+            borderColor: ink,
+            borderWidth: 2,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: gridColor },
+              ticks: { stepSize: 5, color: ink, font: { family: `Space Mono`, size: 11 } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: ink, font: { family: `Space Mono`, size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    function renderMetamodelSelector() {
+      const container = document.getElementById(`metamodel-selector`);
+      if (!container) return;
+      container.innerHTML = METAMODELS_DATA.map(function (m) {
+        const isActive = m.id === APP_STATE.activeMetamodelId;
+        return `
+          <button type="button" class="meta-card-btn ${isActive ? `active` : ``}" role="tab" aria-selected="${isActive}" onclick="selectMetamodel('${m.id}')">
+            <div>
+              <span class="label-voice">${m.range}</span>
+              <div class="subhead" style="margin-top: var(--space-xs);">${m.name}</div>
+            </div>
+            <div class="magenta-note">${m.count} modelos · ${m.focus}</div>
+          </button>
+        `;
+      }).join(``);
+      renderMetamodelInspector();
+    }
+
+    function selectMetamodel(id) {
+      APP_STATE.activeMetamodelId = id;
+      renderMetamodelSelector();
+      persistState();
+    }
+
+    function renderMetamodelInspector() {
+      const box = document.getElementById(`metamodel-inspector`);
+      if (!box) return;
+      const m = METAMODELS_DATA.find(function (item) { return item.id === APP_STATE.activeMetamodelId; }) || METAMODELS_DATA[0];
+      box.innerHTML = `
+        <div style="display: grid; gap: var(--space-md);">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-sm); border-bottom: 2px solid var(--outline); padding-bottom: var(--space-sm);">
+            <div>
+              <span class="stamp">${m.range} · ${m.count} modelos</span>
+              <h3 class="subhead" style="margin-top: var(--space-xs); font-size: 1.45rem;">Metamodelos ${m.name.replace(/^\d+\.\s*/, ``)}</h3>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="jumpToBankForMetamodel('${m.name.replace(/^\d+\.\s*/, ``)}')">
+              <span>Ver ejemplos en el Banco</span>
+            </button>
+          </div>
+
+          <div class="grid-2-eq">
+            <div>
+              <div class="label-voice">Qué desarrollan en el alumnado</div>
+              <ul class="list-clean" style="margin-top: var(--space-xs);">
+                ${m.benefits.map(function (b) { return `<li>${b}</li>`; }).join(``)}
+              </ul>
+            </div>
+            <div>
+              <div class="label-voice">Modelos que integran este bloque</div>
+              <ul class="list-clean" style="margin-top: var(--space-xs);">
+                ${m.models.map(function (mod) { return `<li>${mod}</li>`; }).join(``)}
+              </ul>
+            </div>
+          </div>
+
+          <div class="problem-statement">
+            <div class="label-voice">Ejemplo representativo</div>
+            <p style="margin-top: var(--space-xs);">${m.sample}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function jumpToBankForMetamodel(metamodelLabel) {
+      const sel = document.getElementById(`filter-metamodel`);
+      if (sel) sel.value = metamodelLabel;
+      applyBankFilters();
+      switchTab(`banco`);
+    }
+
+    /* E-P-R-S Combinatorial Lab */
+    function toggleEprsPart(part) {
+      APP_STATE.eprsGiven[part] = !APP_STATE.eprsGiven[part];
+      updateEprsLab();
+      persistState();
+    }
+
+    function updateEprsLab() {
+      const parts = [`E`, `P`, `R`, `S`];
+      parts.forEach(function (p) {
+        const btn = document.querySelector(`.eprs-toggle[data-part="${p}"]`);
+        const rect = document.getElementById(`svg-box-` + p);
+        const txt = document.getElementById(`svg-txt-` + p);
+        const isGiven = APP_STATE.eprsGiven[p];
+        if (btn) btn.classList.toggle(`given`, isGiven);
+        if (rect) rect.setAttribute(`fill`, isGiven ? `var(--primary)` : `var(--surface-container-low)`);
+        if (txt) txt.setAttribute(`fill`, isGiven ? `var(--on-primary)` : `var(--on-surface)`);
+      });
+
+      const key = parts.filter(function (p) { return APP_STATE.eprsGiven[p]; }).join(`-`) || `NONE`;
+      const catalog = {
+        'NONE': {
+          meta: `Metamodelos Generativos (Modelos 1 y 4)`,
+          task: `Invención libre o a partir de una situación cotidiana sin números ni pregunta cerrada.`,
+          example: `«Imagina una situación matemática a partir de la frase: “Me he quedado sin dinero”.»`
+        },
+        'E': {
+          meta: `Metamodelos de Enlaces (Modelo 10) / Fase 3`,
+          task: `El alumnado formula todas las preguntas posibles (con operación, sin operación o imposibles) a partir del enunciado.`,
+          example: `«Sonia ha visto la TV 137 min; Ramón, 29 min menos. ¿Qué preguntas se pueden responder con este enunciado?»`
+        },
+        'P': {
+          meta: `Metamodelos de Enlaces (Modelo 14) / Fase 4`,
+          task: `El alumnado construye un enunciado completo capaz de dar sentido y datos suficientes a la pregunta dada.`,
+          example: `«¿Cuánto cuestan dos docenas de huevos?» → Definir qué datos faltan antes de inventar el enunciado.`
+        },
+        'R': {
+          meta: `Metamodelos de Estructuración (Modelo 7) / Fase 5`,
+          task: `Crear una historia y una pregunta que encajen lógicamente con la operación o expresión matemática dada.`,
+          example: `Expresión dada: (16 + 7 – 4) × 5 → Crear un contexto real coherente.`
+        },
+        'S': {
+          meta: `Metamodelos de Estructuración (Modelo 6) / Fase 6`,
+          task: `Construcción inversa completa desde la solución: el alumno inventa E, P y R para llegar al resultado dado.`,
+          example: `Solución dada: «16 páginas» (o «No lo consiguió»).`
+        },
+        'E-S': {
+          meta: `Metamodelos de Enlaces (Modelo 13) / Composición (Modelo 42)`,
+          task: `Deducir la pregunta que encaja con la solución, o completar datos borrados del enunciado para cuadrar con la respuesta.`,
+          example: `«La catedral de Sevilla se construyó entre 1402 y 1519. ¿___? Sol.: 117 años / No se puede saber.»`
+        },
+        'E-R': {
+          meta: `Metamodelos de Enlaces (Modelos 11–12) / Composición (Modelo 41)`,
+          task: `Escribir la pregunta que exige exactamente esa operación, o completar los huecos numéricos del enunciado según la cuenta resuelta.`,
+          example: `«Sofía compra __ sobres... Resolución: 17 – 3 = 14; 14 × 7 = 98.»`
+        },
+        'P-S': {
+          meta: `Metamodelos de Enlaces (Modelos 15, 18 y 21)`,
+          task: `Inventar un enunciado (usando todos los datos o con datos distractores) que al responder a la pregunta arroje la solución dada.`,
+          example: `«¿Cuántas páginas le quedan a Susana por leer? Sol.: 32.»`
+        },
+        'P-R': {
+          meta: `Metamodelos de Enlaces (Modelos 16, 17 y 20)`,
+          task: `Construir un enunciado que responda a la pregunta usando exactamente la operación o proceso indicado.`,
+          example: `«¿Cuántas gallinas hay dentro del corral?» Una historia con suma y otra con resta.`
+        },
+        'E-P': {
+          meta: `Problema escolar clásico (o Transformación si se altera)`,
+          task: `Cuando se dan E y P completos, la riqueza creativa viene al aplicar Transformación (cambiar datos, quitar superfluidades, negar proposiciones).`,
+          example: `Prueba a suprimir un dato o a preguntar: «¿Qué cambiarías para que la respuesta sea la contraria?»`
+        }
+      };
+
+      const info = catalog[key] || {
+        meta: `Combinación personalizada (${key}) · Metamodelos de Estructuración / Transformación`,
+        task: `Al fijar ${key.split(`-`).length} piezas del problema, el alumnado verifica coherencia, detecta posibles datos falsos o completa los huecos restantes.`,
+        example: `Pide a tus alumnos que comprueben si las piezas fijadas son compatibles o si existe algún dato inconsistente (Modelos 27–28).`
+      };
+
+      const box = document.getElementById(`eprs-result-box`);
+      if (!box) return;
+      box.innerHTML = `
+        <span class="stamp">${info.meta}</span>
+        <p style="margin-top: var(--space-xs);"><strong>Actividad que genera:</strong> ${info.task}</p>
+        <p><strong>Ejemplo para la pizarra:</strong> ${info.example}</p>
+      `;
+    }
+
+    /* ======================================================================
+       TAB 4: GUÍA DE AULA (ITINERARIO + CHECKLIST PERSISTENTE)
+       ====================================================================== */
+    function renderItineraryAccordion() {
+      const container = document.getElementById(`itinerary-accordion`);
+      if (!container) return;
+      container.innerHTML = ITINERARY_PHASES.map(function (item, idx) {
+        return `
+          <div class="phase-doc-item ${idx === 0 ? `open` : ``}" id="itinerary-item-${idx}">
+            <button type="button" class="phase-doc-trigger" aria-expanded="${idx === 0}" onclick="toggleItinerary(${idx})">
+              <span>${item.title}</span>
+              <span class="label-voice">${item.time}</span>
+            </button>
+            <div class="phase-doc-body">
+              <p>${item.desc}</p>
+              <p class="magenta-note">${item.activity}</p>
+            </div>
+          </div>
+        `;
+      }).join(``);
+    }
+
+    function toggleItinerary(idx) {
+      const item = document.getElementById(`itinerary-item-` + idx);
+      if (!item) return;
+      const isOpen = item.classList.toggle(`open`);
+      const btn = item.querySelector(`.phase-doc-trigger`);
+      if (btn) btn.setAttribute(`aria-expanded`, isOpen ? `true` : `false`);
+    }
+
+    function renderChecklist() {
+      const container = document.getElementById(`teacher-checklist-container`);
+      if (!container) return;
+      container.innerHTML = TEACHER_CHECKLIST_ITEMS.map(function (item) {
+        const checked = APP_STATE.checkedChecklistIds.indexOf(item.id) !== -1;
+        return `
+          <label class="checklist-row">
+            <input type="checkbox" ${checked ? `checked` : ``} onchange="toggleChecklistItem('${item.id}', this.checked)">
+            <span>${item.text}</span>
+          </label>
+        `;
+      }).join(``);
+
+      const badge = document.getElementById(`checklist-progress-badge`);
+      if (badge) {
+        badge.textContent = `${APP_STATE.checkedChecklistIds.length} / ${TEACHER_CHECKLIST_ITEMS.length} pautas activas`;
+        badge.classList.toggle(`success`, APP_STATE.checkedChecklistIds.length === TEACHER_CHECKLIST_ITEMS.length);
+      }
+
+      const noteEl = document.getElementById(`teacher-session-note`);
+      if (noteEl && noteEl.value !== APP_STATE.teacherNote) {
+        noteEl.value = APP_STATE.teacherNote;
+      }
+    }
+
+    function toggleChecklistItem(id, isChecked) {
+      const idx = APP_STATE.checkedChecklistIds.indexOf(id);
+      if (isChecked && idx === -1) {
+        APP_STATE.checkedChecklistIds.push(id);
+      } else if (!isChecked && idx !== -1) {
+        APP_STATE.checkedChecklistIds.splice(idx, 1);
+      }
+      renderChecklist();
+      persistState();
+    }
+
+    function saveTeacherNote(val) {
+      APP_STATE.teacherNote = val;
+      persistState();
+    }
+
+    function resetTeacherNotes(btn) {
+      if (!btn) return;
+      if (btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.textContent = `Confirmar reinicio`;
+        return;
+      }
+      btn.dataset.armed = `false`;
+      btn.textContent = `Reiniciar`;
+      APP_STATE.checkedChecklistIds = [];
+      APP_STATE.teacherNote = ``;
+      const noteEl = document.getElementById(`teacher-session-note`);
+      if (noteEl) noteEl.value = ``;
+      renderChecklist();
+      persistState();
+    }
+
+    function exportTeacherGuide() {
+      const lines = [
+        `GUÍA DE SESIÓN · METODOLOGÍA FERNÁNDEZ BRAVO`,
+        `==================================================`,
+        ``,
+        `PAUTAS ACTIVAS:`,
+        ...TEACHER_CHECKLIST_ITEMS.map(function (c) {
+          const mark = APP_STATE.checkedChecklistIds.indexOf(c.id) !== -1 ? `[X]` : `[ ]`;
+          return `${mark} ${c.text}`;
+        }),
+        ``,
+        `NOTAS DE AULA:`,
+        APP_STATE.teacherNote.trim() ? APP_STATE.teacherNote.trim() : `(Sin notas anotadas todavía)`
+      ];
+      downloadTextFile(lines.join(`\n`), `guia-aula-fernandez-bravo.txt`);
+    }
+
+    /* ======================================================================
+       TAB 5: BANCO DE SITUACIONES PROBLEMÁTICAS
+       ====================================================================== */
+    function getFilteredProblems() {
+      const metaEl = document.getElementById(`filter-metamodel`);
+      const typeEl = document.getElementById(`filter-type`);
+      const cycleEl = document.getElementById(`filter-cycle`);
+      const searchEl = document.getElementById(`filter-search`);
+
+      const metaVal = metaEl ? metaEl.value : `all`;
+      const typeVal = typeEl ? typeEl.value : `all`;
+      const cycleVal = cycleEl ? cycleEl.value : `all`;
+      const query = searchEl ? searchEl.value.trim().toLowerCase() : ``;
+
+      return BANK_PROBLEMS.filter(function (p) {
+        if (metaVal !== `all` && p.metamodel !== metaVal) return false;
+        if (typeVal !== `all` && p.type !== typeVal) return false;
+        if (cycleVal !== `all` && p.cycle !== cycleVal) return false;
+        if (APP_STATE.workedOnlyFilter && APP_STATE.workedProblemIds.indexOf(p.id) === -1) return false;
+        if (query) {
+          const hay = (p.title + ` ` + p.statement + ` ` + p.metamodel + ` ` + p.type).toLowerCase();
+          if (hay.indexOf(query) === -1) return false;
+        }
+        return true;
+      });
+    }
+
+    function applyBankFilters() {
+      const list = getFilteredProblems();
+      const container = document.getElementById(`bank-cards-container`);
+      const badge = document.getElementById(`bank-count-badge`);
+      if (badge) {
+        badge.textContent = `Mostrando ${list.length} de ${BANK_PROBLEMS.length} situaciones`;
+      }
+      if (!container) return;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="ink-block" style="grid-column: 1 / -1; text-align: left;">
+            <h3 class="subhead">No hay situaciones que coincidan con esos filtros</h3>
+            <p style="margin-top: var(--space-xs); color: var(--on-surface-variant);">
+              Prueba a ampliar el ciclo educativo o limpiar el buscador para explorar los 18 modelos disponibles.
+            </p>
+            <button type="button" class="btn btn-secondary" style="margin-top: var(--space-md);" onclick="clearBankFilters()">Mostrar todas las situaciones</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(function (p) {
+        const isWorked = APP_STATE.workedProblemIds.indexOf(p.id) !== -1;
+        return `
+          <article class="problem-card ${isWorked ? `worked` : ``}" id="card-${p.id}">
+            <div style="display: grid; gap: var(--space-sm);">
+              <div style="display: flex; flex-wrap: wrap; gap: var(--space-xs); justify-content: space-between; align-items: center;">
+                <span class="stamp">${p.metamodel}</span>
+                <span class="stamp stamp-outline">${p.cycle}</span>
+              </div>
+              <div class="magenta-note">${p.type}</div>
+              <h3 class="subhead">${p.title}</h3>
+              <div class="problem-statement">${p.statement}</div>
+            </div>
+
+            <div class="problem-guide" id="guide-${p.id}">
+              <div>
+                <div class="label-voice" style="color: var(--primary);">Preguntas para guiar al grupo</div>
+                <p style="margin-top: var(--space-xs);">${p.questions}</p>
+              </div>
+              <div>
+                <div class="label-voice" style="color: var(--tertiary);">Orientación y solución</div>
+                <p style="margin-top: var(--space-xs);">${p.solution}</p>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-xs); justify-content: space-between; align-items: center;">
+              <button type="button" class="btn btn-ghost" onclick="toggleProblemGuide('${p.id}', this)">Ver guía docente</button>
+              <button type="button" class="btn ${isWorked ? `btn-secondary` : `btn-ghost`}" onclick="toggleProblemWorked('${p.id}')">
+                ${isWorked ? `Trabajada en aula` : `Marcar trabajada`}
+              </button>
+            </div>
+          </article>
+        `;
+      }).join(``);
+    }
+
+    function toggleProblemGuide(id, btn) {
+      const guide = document.getElementById(`guide-` + id);
+      if (!guide) return;
+      const isOpen = guide.classList.toggle(`open`);
+      if (btn) btn.textContent = isOpen ? `Ocultar guía` : `Ver guía docente`;
+    }
+
+    function toggleProblemWorked(id) {
+      const idx = APP_STATE.workedProblemIds.indexOf(id);
+      if (idx === -1) APP_STATE.workedProblemIds.push(id);
+      else APP_STATE.workedProblemIds.splice(idx, 1);
+      applyBankFilters();
+      persistState();
+    }
+
+    function toggleWorkedFilter() {
+      APP_STATE.workedOnlyFilter = !APP_STATE.workedOnlyFilter;
+      const btn = document.getElementById(`toggle-worked-only`);
+      if (btn) btn.classList.toggle(`btn-active-filter`, APP_STATE.workedOnlyFilter);
+      applyBankFilters();
+      persistState();
+    }
+
+    function clearBankFilters() {
+      const metaEl = document.getElementById(`filter-metamodel`);
+      const typeEl = document.getElementById(`filter-type`);
+      const cycleEl = document.getElementById(`filter-cycle`);
+      const searchEl = document.getElementById(`filter-search`);
+      if (metaEl) metaEl.value = `all`;
+      if (typeEl) typeEl.value = `all`;
+      if (cycleEl) cycleEl.value = `all`;
+      if (searchEl) searchEl.value = ``;
+      APP_STATE.workedOnlyFilter = false;
+      const btn = document.getElementById(`toggle-worked-only`);
+      if (btn) btn.classList.remove(`btn-active-filter`);
+      applyBankFilters();
+      persistState();
+    }
+
+    function exportFilteredProblems() {
+      const list = getFilteredProblems();
+      const lines = [
+        `BANCO DE SITUACIONES PROBLEMÁTICAS · FERNÁNDEZ BRAVO`,
+        `===================================================`,
+        ``
+      ];
+      list.forEach(function (p, idx) {
+        lines.push(`${idx + 1}. [${p.metamodel} · ${p.type} · ${p.cycle}] ${p.title}`);
+        lines.push(`   Enunciado: ${p.statement}`);
+        lines.push(`   Preguntas guía: ${p.questions}`);
+        lines.push(`   Orientación: ${p.solution}`);
+        lines.push(``);
+      });
+      downloadTextFile(lines.join(`\n`), `banco-situaciones-primaria.txt`);
+    }
+
+    function downloadTextFile(content, filename) {
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content: content,
+          contentType: `text/plain`,
+          encoding: `UTF-8`,
+          filename: filename
+        });
+        return;
+      }
+      const blob = new Blob([content], { type: `text/plain;charset=utf-8` });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement(`a`);
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    /* ======================================================================
+       INITIALIZATION
+       ====================================================================== */
+    async function initApp() {
+      if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+        try {
+          isRestoringState = true;
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && typeof saved === `object`) {
+            if (saved.activeTab) APP_STATE.activeTab = saved.activeTab;
+            if (saved.selectedErrorId) APP_STATE.selectedErrorId = saved.selectedErrorId;
+            if (saved.anovaMode) APP_STATE.anovaMode = saved.anovaMode;
+            if (saved.activePhaseNum) APP_STATE.activePhaseNum = saved.activePhaseNum;
+            if (saved.activeMetamodelId) APP_STATE.activeMetamodelId = saved.activeMetamodelId;
+            if (saved.eprsGiven) APP_STATE.eprsGiven = saved.eprsGiven;
+            if (Array.isArray(saved.checkedChecklistIds)) APP_STATE.checkedChecklistIds = saved.checkedChecklistIds;
+            if (typeof saved.teacherNote === `string`) APP_STATE.teacherNote = saved.teacherNote;
+            if (Array.isArray(saved.workedProblemIds)) APP_STATE.workedProblemIds = saved.workedProblemIds;
+            if (typeof saved.workedOnlyFilter === `boolean`) APP_STATE.workedOnlyFilter = saved.workedOnlyFilter;
+          }
+        } catch (err) {
+          // Safe fallback if state unavailable
+        } finally {
+          isRestoringState = false;
+        }
+      }
+
+      renderErrorChips();
+      initAnovaChart();
+      setAnovaChartMode(APP_STATE.anovaMode);
+      renderPhaseRail();
+      initMetamodelsChart();
+      renderMetamodelSelector();
+      updateEprsLab();
+      renderItineraryAccordion();
+      renderChecklist();
+
+      const workedBtn = document.getElementById(`toggle-worked-only`);
+      if (workedBtn) workedBtn.classList.toggle(`btn-active-filter`, APP_STATE.workedOnlyFilter);
+      applyBankFilters();
+
+      switchTab(APP_STATE.activeTab);
+
+      if (window.lucide && typeof window.lucide.createIcons === `function`) {
+        window.lucide.createIcons();
+      }
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    document.addEventListener(`DOMContentLoaded`, initApp);
+  </script>
+</body>
+</html>
